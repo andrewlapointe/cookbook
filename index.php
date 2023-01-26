@@ -11,14 +11,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/home.css" />
-    <title>Test Page</title>
+    <title>LaPointe Cooing Compendium</title>
 </head>
 <header>
       <div id="navbar" style="z-index: 10">
         <a href="index.php">Home</a>
         <a href="month_view.php">Month View</a>
-        <a href="year_view.php">Year View</a>
-        <a href="stats.php">Statistics</a>
+        <a href="">placeholder
+        <a href="">placeholder</a>
         <a href="about.php">About</a>
         
         <!-- <a href=""></a> -->
@@ -60,5 +60,6 @@
         <input type="text" name="num02" placeholder="Number 2">
         <button type="submit">Calculate!</button>
     </form>
+    <script src="js/test.js"></script>
 </body>
 </html>
