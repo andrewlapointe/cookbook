@@ -1,5 +1,6 @@
 <?php
     include_once 'includes/dbh.inc.php';
+    include 'nav.php';
 ?>
 
 
@@ -11,26 +12,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/home.css" />
-    <title>LaPointe Cooing Compendium</title>
+    <title>LaPointe Cooking Compendium</title>
 </head>
-<header>
-      <div id="navbar" style="z-index: 10">
-        <a href="index.php">Home</a>
-        <a href="month_view.php">Month View</a>
-        <a href="">placeholder
-        <a href="">placeholder</a>
-        <a href="about.php">About</a>
-        
-        <!-- <a href=""></a> -->
-        <button
-          onclick="window.location.href='https://github.com/andrewlapointe';"
-          class="btn"
-          style="z-index: 12"
-        >
-          GitHub
-        </button>
-      </div>
-</header>
+
 <body class="home">
     <p>This is a paragraph</p>
     <?php if (1 == 1){ ?>
@@ -45,7 +29,7 @@
 
         if ($resultCheck > 0) {
             while ($row = mysqli_fetch_assoc($results)) {
-                echo $row['user_first'] . "<br>";
+                echo "<p class='blue'> {$row["username"]} </p>";
             }
         }
     ?>
