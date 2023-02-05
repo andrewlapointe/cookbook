@@ -1,22 +1,21 @@
 <?php
-function myCalculator($num01, $oper, $num02) {
-    $sum;
-    switch ($oper) {
-        case "add":
-            $sum = $num01 + $num02;
-            break;
-        case "sub":
-            $sum = $num01 - $num02;
-            break;
-        default:
-        $sum = "There was an error!";
-        break;
+include_once 'includes/dbh.inc.php';
+
+
+function insert($recipe_name, $recipe_txt, $conn) {
+    $sql = "INSERT INTO recipe (recipe_name, recipe_txt)
+            VALUES ('$recipe_name', '$recipe_txt')";
+
+    if (mysqli_query($conn, $sql)) {
+        echo "New record created successfully";
+    } else {
+        echo "Error: " . $sql . "<br>" . mysqli_error($conn);
     }
-    return $sum;
 }
 
-$num01 = $_GET["num01"];
-$num02 = $_GET["num02"];
-$oper = $_GET["oper"];
+$name = $_GET["recipe_name"];
+$txt = $_GET["recipe_txt"];
 
-echo "Value: " . myCalculator($num01, $oper, $num02);
+insert($name, $txt, $conn);
+
+
