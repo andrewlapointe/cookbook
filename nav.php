@@ -1,10 +1,16 @@
+<head>
+    <link rel="stylesheet" href="css/navbar.css" />
+</head>
+
 <header>
-      <div id="navbar" style="z-index: 10">
-        <a href="index.php">Home</a>
-        <a href="month_view.php">Month View</a>
-        <a href="">placeholder
-        <a href="">placeholder</a>
-        <a href="about.php">About</a>
+      <div class="navbar" style="z-index: 10">
+        <a class='logo' href="index.php">Mom's Cookbook</a>
+        <a class='shade' href="month_view.php">Month View</a>
+        <a class='shade' href="dummy.php">Dummy
+        <a class='shade' href="about.php">About</a>
+
+        <!-- Search Bar #TODO -->
+        <input type="text" placeholder="Search..">
         
         <!-- <a href=""></a> -->
         <button
