@@ -7,71 +7,42 @@
 
 body {
   margin: 0px;
-  margin-top: 80px;
+  /* margin-top: 80px; */
 }
 
-/* Style the navbar */
-/* .navbar {
-  overflow: hidden;
+.navbar {
   background-color: var(--dark-grey);
-  position: fixed;
-  top: 0;
-  width: 100%; 
-  height: 58px;
-} */
-
-/* #logo-link {} */
-
-/* #nav-links {
-  margin-left: 10%;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding-left: 10%;
+  padding-right: 20%;
 }
-#right-link {
-  text-align: right;
-} */
 
-/* Navbar links */
-/* .navbar a {
-  float: left;
-  display: block;
-  color: #f2f2f2;
-  text-align: center;
-  padding: 20px;
-  text-decoration: none;
-} */
-
-/* .navbar a.shade:hover {
-  float: left;
-  display: block;
-  color: #f2f2f2;
-  text-align: center;
-  padding: 20px;
-  text-decoration: none;
-  background-color: var(--light-blue);
-} */
-
-/* .navbar .logo {
-  margin-right: 6%;
-} */
-
-/* .navbar b {
-  float: left;
+.navbar .grid-item {
   display: flex;
-  color: #f2f2f2;
-  margin: auto;
-  padding: 20px;
-  font-weight: normal;
-} */
+  gap: 0px;
+  /* width: 100%; */
+  /* text-align: center; */
+  justify-content: center;
+  align-content: center;
+}
 
-/* div.navbar input {
-  float: left;
-  display: block;
-  color: #f2f2f2;
-  text-align: center;
-  margin-top: 14px;
-  margin-left: 2%;
-  padding: 5px;
-  color: black;
-} */
+.navbar .grid-item.shade:hover {
+  background-color: var(--medium-blue);
+}
+
+#logo {
+  grid-column: 1/3;
+}
+
+.grid-item a {
+  padding-top: 20px;
+  padding-bottom: 20px;
+
+  /* width: fit-content; */
+  color: white;
+  text-decoration: none;
+}
 
 /* Page content */
 .content {
