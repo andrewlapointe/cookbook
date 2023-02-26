@@ -35,6 +35,8 @@
     <!-- <iframe width="352" height="626" src="https://www.youtube.com/embed/Y1CIbO3O8-s" title="Powerlifter VS Crossfitter" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe> -->
 
     <?php
+    
+    echo 'PHP version: ' . phpversion();
         $sql = "SELECT * FROM recipe;";
         $results = mysqli_query($conn, $sql);
         $resultCheck = mysqli_num_rows($results);

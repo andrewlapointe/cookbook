@@ -1,5 +1,6 @@
 <?php
     include_once 'includes/dbh.inc.php';
+    include 'nav.php';
 ?>
 
 <!DOCTYPE html>
@@ -8,27 +9,10 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/navbar.css" />
+    <link rel="stylesheet" href="css/styles.css">
     <title>About</title>
 </head>
-<header>
-      <div id="navbar" style="z-index: 10">
-        <a href="index.php">Home</a>
-        <a href="month_view.php">Month View</a>
-        <a href="">placeholder
-        <a href="">placeholder</a>
-        <a href="about.php">About</a>
-        
-        <!-- <a href=""></a> -->
-        <button
-          onclick="window.location.href='https://github.com/andrewlapointe';"
-          class="btn"
-          style="z-index: 12"
-        >
-          GitHub
-        </button>
-      </div>
-</header>
+
 <body>
     <h1>About</h1>
     <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.
