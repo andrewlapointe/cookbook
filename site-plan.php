@@ -244,21 +244,21 @@
 
         <h3>Home</h3>
         <p>
-            [Any additional details about home that the wireframe does not make clear]
+            Welcome banner and three sample recipes with images.
         </p>
-        <img src="#" alt="home page wireframe">
+        <img src="images/homepage_wireframe.png" alt="home page wireframe">
 
         <h3>[Page 2]</h3>
         <p>
-            [Any additional details about page 2 that the wireframe does not make clear]
+            Alphabetized list of all recipes.
         </p>
-        <img src="images/subpagewireframe.png" alt="page 2 wireframe">
+        <img src="images/page2_wireframe.png" alt="page 2 wireframe">
 
         <h3>[Page 3]</h3>
         <p>
-            [Any additional details about page 3 that the wireframe does not make clear]
+            Individual recipe with image and ingredient list.
         </p>
-        <img src="#" alt="page 3 wireframe">
+        <img src="images/page3_wireframe.png" alt="page 3 wireframe">
     </main>
 </body>
 
