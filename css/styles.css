@@ -7,7 +7,12 @@
 
 body {
   margin: 0px;
-  /* margin-top: 80px; */
+}
+
+.home {
+  margin-left: 100px;
+  margin-right: 100px;
+  display: grid;
 }
 
 .navbar {

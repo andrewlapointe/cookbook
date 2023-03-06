@@ -6,6 +6,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -14,21 +15,29 @@
     <title>LaPointe Cooking Compendium</title>
 </head>
 
-<body class="home">
-    <p>This is a paragraph</p>
-    <?php if (1 == 1){ ?>
-       <p>Hello World!</p>
-    <?php }?>
-    <p>This is a paragraph</p>
+<body>
+    <div class="home">
+        <h1>
+            TITLE
+        </h1>
+        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet
+            dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper
+            suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in
+            vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et
+            accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait
+            nulla facilisi.
+        </p>
+    </div>
 
-<div class="insert_form">
-<form action="functions.php" method="get">
-        <input type="text" name="recipe_name" placeholder="Number 1">
-        <input type="text" name="recipe_txt" placeholder="Number 2">
-        <button type="submit">Calculate!</button>
-    </form>
 
-</div>
+    <div class="insert_form">
+        <form action="functions.php" method="get">
+            <input type="text" name="recipe_name" placeholder="Number 1">
+            <input type="text" name="recipe_txt" placeholder="Number 2">
+            <button type="submit">Calculate!</button>
+        </form>
+
+    </div>
 
 
 
@@ -51,4 +60,5 @@
 
     <script src="js/test.js"></script>
 </body>
+
 </html>
