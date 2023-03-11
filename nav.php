@@ -4,10 +4,10 @@
             <a href="index.php">Mom's Cookbook</a>
         </div>
         <div class="grid-item shade">
-            <a href="site-plan.php">Site Plan</a>
+            <a href="all-recipes.php">All Recipes</a>
         </div>
         <div class="grid-item shade">
-            <a href="dummy.php">Dummy</a>
+            <a href="recipe.php">Recipe</a>
         </div>
         <div class="grid-item shade">
             <a href="insert.php">Insert</a>

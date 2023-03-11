@@ -27,21 +27,21 @@
         <div class="break"></div>
         <div id="sample-container">
             <div class="sample-item">
-                <a href="#">
+                <a href="recipe.php">
                     <img class="sample-image" src="images/th-928319788" alt="sample image">
                 </a>
                 <div class="break"></div>
                 <h3>Sample Recipe</h3>
             </div>
             <div class="sample-item">
-                <a href="#">
+                <a href="recipe.php">
                     <img class="sample-image" src="images/th-928319788" alt="sample image">
                 </a>
                 <div class="break"></div>
                 <h3>Sample Recipe</h3>
             </div>
             <div class="sample-item">
-                <a href="#">
+                <a href="recipe.php">
                     <img class="sample-image" src="images/th-928319788" alt="sample image">
                 </a>
                 <div class="break"></div>
