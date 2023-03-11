@@ -3,18 +3,14 @@
   --dark-grey: #333;
   --light-blue: #2196f3;
   --medium-blue: #0b7dda;
+  --heading-font: "IM Fell French Canon SC";
+  --paragraph-font: Lato, Helvetica, sans-serif;
 }
-
-body {
-  margin: 0px;
-}
-
-.home {
-  margin-left: 100px;
-  margin-right: 100px;
-  display: grid;
-}
-
+/*  */
+/*  */
+/*  */
+/*  */
+/* -----NAVBAR STYLES----- */
 .navbar {
   background-color: var(--dark-grey);
   display: grid;
@@ -22,7 +18,6 @@ body {
   padding-left: 10%;
   padding-right: 20%;
 }
-
 .navbar .grid-item {
   display: flex;
   gap: 0px;
@@ -31,16 +26,13 @@ body {
   justify-content: center;
   align-content: center;
 }
-
 .navbar .grid-item.shade:hover {
   background-color: var(--medium-blue);
 }
-
-#logo {
+.navbar #logo {
   grid-column: 1/3;
 }
-
-.grid-item a {
+.navbar .grid-item a {
   padding-top: 20px;
   padding-bottom: 20px;
 
@@ -48,41 +40,117 @@ body {
   color: white;
   text-decoration: none;
 }
-
-/* Page content */
-.content {
-  padding: 16px;
-  /* margin-bottom: 20px; */
-}
-
-/* The sticky class is added to the navbar with JS when it reaches its scroll position */
+/* The sticky class can be added to the navbar with JS when it reaches its scroll position */
 .sticky {
   position: fixed;
   top: 0;
   width: 100%;
 }
-
 /* Add some top padding to the page content to prevent sudden quick movement (as the navigation bar gets a new position at the top of the page (position:fixed and top:0) */
 .sticky + .content {
   padding-top: 60px;
 }
-
-.center {
+/* -----NAVBAR STYLES END----- */
+/*  */
+/*  */
+/*  */
+/*  */
+/* -----FOOTER STYLES----- */
+footer div.footer#footer-container {
+  background-color: var(--dark-grey);
+  color: white;
+  width: 100%;
+  display: flex;
+  margin: auto;
+  justify-content: center;
+  gap: 25px;
+  align-items: center;
+}
+.social a img {
+  max-width: 70px;
   margin: auto;
 }
 
-.title {
-  box-sizing: border-box;
-  width: 200px;
-  height: auto;
-  background-color: white;
-  position: fixed; /* Sit on top of the screen */
-  left: 50%;
-  top: 7.5px;
-  margin-left: -100px;
-  text-align: center; /* Centered text */
-  border-radius: 2px; /* Rounded borders */
-  padding: 12px; /* Padding */
-  z-index: 10; /* Add a z-index if needed */
-  border-radius: 5px;
+footer a:hover {
+  background-color: var(--accent-one);
+  color: var(--accent-two);
 }
+/* -----FOOTER STYLES END----- */
+/*  */
+/*  */
+/*  */
+/*  */
+/* -----GENERAL STYLES----- */
+body {
+  margin: 0px;
+}
+.break {
+  /* causes flex items to go to next line */
+  flex-basis: 100%;
+  height: 0;
+}
+.italic {
+  font-style: italic;
+}
+.bold {
+  font-style: bold;
+}
+/* -----GENERAL STYLES END----- */
+/*  */
+/*  */
+/*  */
+/*  */
+/* -----HOME STYLES----- */
+#main-home {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+div.banner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: auto;
+  margin-top: 30px;
+  /* max-width: 700px; */
+
+  /* justify-items: center; */
+}
+.banner img {
+  /* max-width: 100%; */
+  max-height: 150px;
+}
+.banner h1 {
+  margin-top: 20px;
+}
+
+#sample-container {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  /* gap: 20px; */
+  margin-top: 80px;
+  margin-bottom: 80px;
+  max-width: 75%;
+}
+.sample-item {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.sample-item a img {
+  max-width: 80%;
+  border: 3px solid var(--light-blue);
+  border-image: linear-gradient(var(--light-blue), var(--dark-grey)) 30;
+  border-style: solid;
+}
+.sample-item a {
+  text-align: center;
+}
+.sample-item h3 {
+  font-size: 1.5em;
+}
+/* -----HOME STYLES END----- */
+/*  */
+/*  */
+/*  */
+/*  */
