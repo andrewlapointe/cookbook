@@ -5,30 +5,36 @@ Fonts are separated by a | */
 
 :root {
   /* change the values below to your colors from your palette */
-  --primary-color: #9ba2ff;
-  --secondary-color: #a499be;
-  --accent1-color: #9e8576;
-  --accent2-color: 7A542E;
+  --primary-color: #333;
+  --secondary-color: #2196f3;
+  --accent1-color: #0b7dda;
 
   /* change the values below to your chosen font(s) */
-  --heading-font: "IM Fell French Canon SC";
+  --heading-font: "Josefin Sans";
   --paragraph-font: Lato, Helvetica, sans-serif;
 
   /* these colors below should be chosen from among your palette colors above */
-  --headline-color-on-white: #a499be; /* headlines on a white background */
+  --headline-color-on-white: black; /* headlines on a white background */
   --headline-color-on-color: white; /* headlines on a colored background */
-  --paragraph-color-on-white: #a499be; /* paragraph text on a white background */
+  --paragraph-color-on-white: black; /* paragraph text on a white background */
   --paragraph-color-on-color: white; /* paragraph text on a colored background */
-  --paragraph-background-color: #a499be;
-  --nav-link-color: #a499be;
-  --nav-background-color: #9e8576;
+  --paragraph-background-color: var(--secondary-color);
+  --nav-link-color: white;
+  --nav-background-color: var(--primary-color);
   --nav-hover-link-color: white;
-  --nav-hover-background-color: #a499be;
+  --nav-hover-background-color: var(--secondary-color);
 }
 
 /*  Look around below...but DON'T CHANGE ANYTHING! */
 
-body {
+/* body {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4em;
+  font-size: 18px;
+  text-align: center;
+} */
+body:not(header) {
   max-width: 1200px;
   margin: 0 auto;
   padding: 4em;
@@ -56,7 +62,7 @@ hr {
   margin: 35px 0;
   background: var(--accent1-color);
 }
-header {
+/* header {
   padding: 1em;
   text-align: center;
   color: var(--headline-color-on-color);
@@ -65,7 +71,7 @@ header {
 header > h1,
 header > h2 {
   color: var(--headline-color-on-color);
-}
+} */
 
 p {
   font-family: var(--paragraph-font);
