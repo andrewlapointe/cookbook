@@ -3,8 +3,7 @@
   --dark-grey: #333;
   --light-blue: #2196f3;
   --medium-blue: #0b7dda;
-  --heading-font: "IM Fell French Canon SC";
-  --paragraph-font: Lato, Helvetica, sans-serif;
+  font-family: "Josefin Sans", sans-serif;
 }
 /*  */
 /*  */
@@ -12,30 +11,31 @@
 /*  */
 /* -----NAVBAR STYLES----- */
 .navbar {
+  grid-area: nav;
   background-color: var(--dark-grey);
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  padding-left: 10%;
-  padding-right: 20%;
-}
-.navbar .grid-item {
   display: flex;
-  gap: 0px;
+  justify-content: center;
+  /* padding-left: 10%;
+  padding-right: 10%; */
+  /* height: 60px; */
+  font-size: 1.3em;
+}
+.navbar .flex-item {
+  display: flex;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  padding-left: 20px;
+  padding-right: 20px;
+  /* height: 60px; */
   /* width: 100%; */
   /* text-align: center; */
   justify-content: center;
-  align-content: center;
+  align-items: center;
 }
-.navbar .grid-item.shade:hover {
+.navbar .flex-item.shade:hover {
   background-color: var(--medium-blue);
 }
-.navbar #logo {
-  grid-column: 1/3;
-}
-.navbar .grid-item a {
-  padding-top: 20px;
-  padding-bottom: 20px;
-
+.navbar .flex-item a {
   /* width: fit-content; */
   color: white;
   text-decoration: none;
@@ -56,19 +56,17 @@
 /*  */
 /*  */
 /* -----FOOTER STYLES----- */
+footer {
+  grid-area: footer;
+}
 footer div.footer#footer-container {
   background-color: var(--dark-grey);
   color: white;
   width: 100%;
   display: flex;
-  margin: auto;
   justify-content: center;
-  gap: 25px;
   align-items: center;
-}
-.social a img {
-  max-width: 70px;
-  margin: auto;
+  margin: 0;
 }
 footer a {
   color: var(--light-blue);
@@ -78,14 +76,30 @@ footer a:hover {
   background-color: var(--accent-one);
   color: var(--medium-blue);
 }
+footer p {
+  padding-left: 10px;
+  padding-right: 10px;
+}
 /* -----FOOTER STYLES END----- */
 /*  */
 /*  */
 /*  */
 /*  */
 /* -----GENERAL STYLES----- */
+html,
 body {
+  height: 100%;
   margin: 0px;
+}
+body {
+  display: grid;
+  grid-gap: 10px;
+  grid-template-columns: 1fr;
+  grid-template-areas: "nav" "main" "footer";
+  grid-template-rows: 80px 1fr 40px;
+}
+main {
+  grid-area: main;
 }
 .break {
   /* causes flex items to go to next line - requires flex-wrap: wrap;*/
