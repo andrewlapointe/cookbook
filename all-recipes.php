@@ -1,70 +1,57 @@
 <?php
-    include 'includes/dbh.inc.php';
+    include 'nav.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/styles.css">
-    <title>All Recipes</title>
-</head>
-
-<body>
-    <?php
-        include 'nav.php';
-    ?>
-    <main id="all-recipes-main">
-        <div class="content">
-            <div class="fork">
-                <img src="images/fork.png" alt="fork">
-            </div>
-            <div class="list-of-recipes">
-                <h1>List of all Recipes</h1>
-                <ul>
-                    <a href="recipe.php">
-                        <li>Dummy Recipe</li>
-                    </a>
-                    <a href="recipe.php">
-                        <li>Dummy Recipe</li>
-                    </a>
-                    <a href="recipe.php">
-                        <li>Dummy Recipe</li>
-                    </a>
-                    <a href="recipe.php">
-                        <li>Dummy Recipe</li>
-                    </a>
-                    <a href="recipe.php">
-                        <li>Dummy Recipe</li>
-                    </a>
-                    <a href="recipe.php">
-                        <li>Dummy Recipe</li>
-                    </a>
-                    <a href="recipe.php">
-                        <li>Dummy Recipe</li>
-                    </a>
-                    <a href="recipe.php">
-                        <li>Dummy Recipe</li>
-                    </a>
-                    <a href="recipe.php">
-                        <li>Dummy Recipe</li>
-                    </a>
-                    <a href="recipe.php">
-                        <li>Dummy Recipe</li>
-                    </a>
-
-                </ul>
-            </div>
+<main id="all-recipes-main">
+    <div class="content">
+        <div class="fork">
+            <!-- https://www.rawpixel.com/image/6288328/png-sticker-vintage#eyJrZXlzIjoiZm9yayIsInNvcnRlZEtleXMiOiJmb3JrIn0= -->
+            <img src="images/fork.png" alt="fork">
         </div>
+        <div class="list-of-recipes">
+            <h1>List of all Recipes</h1>
+            <ul>
+                <a href="recipe.php">
+                    <li>Dummy Recipe</li>
+                </a>
+                <a href="recipe.php">
+                    <li>Dummy Recipe</li>
+                </a>
+                <a href="recipe.php">
+                    <li>Dummy Recipe</li>
+                </a>
+                <a href="recipe.php">
+                    <li>Dummy Recipe</li>
+                </a>
+                <a href="recipe.php">
+                    <li>Dummy Recipe</li>
+                </a>
+                <a href="recipe.php">
+                    <li>Dummy Recipe</li>
+                </a>
+                <a href="recipe.php">
+                    <li>Dummy Recipe</li>
+                </a>
+                <a href="recipe.php">
+                    <li>Dummy Recipe</li>
+                </a>
+                <a href="recipe.php">
+                    <li>Dummy Recipe</li>
+                </a>
+                <a href="recipe.php">
+                    <li>Dummy Recipe</li>
+                </a>
 
-    </main>
-    <?php
+            </ul>
+        </div>
+    </div>
+
+</main>
+<?php
         include 'footer.php';
     ?>
 
-    <!-- <?php
+<!-- <?php
     $sql = "SELECT * FROM recipe;";
     $results = mysqli_query($conn, $sql);
     $resultCheck = mysqli_num_rows($results);
