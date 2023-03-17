@@ -46,6 +46,9 @@
             </ul>
         </form>
     </div>
+    <?php
+        include 'footer.php';
+    ?>
     </body>
     <script src="js/form.js"></script>
 </div>

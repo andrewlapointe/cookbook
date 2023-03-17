@@ -8,7 +8,6 @@
         <div class="break"></div>
         <h1>The <span class="italic">Last</span> Cookbook You'll Ever Need.</h1>
     </div>
-    <div class="break"></div>
     <div id="sample-container">
         <div class="sample-item">
             <a href="recipe.php">
