@@ -42,9 +42,9 @@
                 <form action="/search" method="get">
                     <input class="search expandright" id="searchleft" type="search" name="q" placeholder="     Search">
                     <label class="button searchbutton" for="searchleft">
-                        <span class="mglass material-symbols-outlined">
+                        <a class="mglass material-symbols-outlined">
                             search
-                        </span>
+                        </a>
                     </label>
                 </form>
             </div>

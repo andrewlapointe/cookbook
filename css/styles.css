@@ -23,10 +23,7 @@
 }
 .navbar .flex-item {
   display: flex;
-  padding-top: 15px;
-  padding-bottom: 15px;
-  padding-left: 20px;
-  padding-right: 20px;
+
   /* height: 60px; */
   /* width: 100%; */
   /* text-align: center; */
@@ -42,9 +39,14 @@
 .navbar .search-container:focus {
   background-color: var(--medium-blue);
 }
-.navbar .flex-item a {
+.navbar a {
   color: white;
   text-decoration: none;
+  /* min-width: 100%; */
+  padding-top: 15px;
+  padding-bottom: 15px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 .button {
   padding-left: 32px;
