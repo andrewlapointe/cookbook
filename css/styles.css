@@ -1,8 +1,10 @@
 :root {
   margin: 0px;
-  --dark-grey: #333;
-  --light-blue: #2196f3;
-  --medium-blue: #0b7dda;
+  --dark-grey: #4f6d7a;
+  --light-blue: #c0d6df;
+  --pale-blue: #dbe9ee;
+  --medium-blue: #4a6fa5;
+  --dark-blue: #166088;
   font-family: "Josefin Sans", sans-serif;
 }
 /*  */
@@ -121,9 +123,12 @@
 /*  */
 /* -----FOOTER STYLES----- */
 footer {
-  position: absolute;
+  flex-shrink: 0;
+  margin-top: auto;
+  margin-bottom: 0;
+  /* position: absolute;
   bottom: 0px;
-  width: 100%;
+  width: 100%; */
 }
 footer div.footer#footer-container {
   background-color: var(--dark-grey);
@@ -135,12 +140,12 @@ footer div.footer#footer-container {
   margin: 0;
 }
 footer a {
-  color: var(--light-blue);
+  color: white;
 }
 
 footer a:hover {
-  background-color: var(--accent-one);
-  color: var(--medium-blue);
+  /* background-color: var(--accent-one); */
+  color: var(--light-blue);
 }
 footer p {
   padding-left: 10px;
@@ -154,8 +159,11 @@ footer p {
 /* -----GENERAL STYLES----- */
 html,
 body {
-  height: 100%;
+  /* height: 100%; */
   margin: 0px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 a {
@@ -178,6 +186,9 @@ a {
 }
 .block {
   display: block;
+}
+main {
+  flex: 1 0 auto;
 }
 /* -----GENERAL STYLES END----- */
 /*  */
@@ -209,6 +220,14 @@ div.banner {
   margin-top: 30px;
 }
 #sample-container {
+  /* background-color: #bfacc8; */
+  background-image: linear-gradient(180deg, white, var(--light-blue));
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+#sample-cards {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
   /* gap: 20px; */
@@ -225,21 +244,22 @@ div.banner {
 
 .sample-item a {
   text-align: center;
+  max-width: 80%;
 }
 .sample-item h3 {
   font-size: 1.5em;
 }
 .sample-image {
-  max-width: 80%;
-  border: 3px solid var(--light-blue);
-  border-image: linear-gradient(var(--light-blue), var(--dark-grey)) 30;
+  width: 100%;
+  border: 3px solid var(--medium-blue);
+  /* border-image: linear-gradient(var(--light-blue), #4a6fa5) 30; */
   border-style: solid;
   transition: transform 0.5s;
 }
 .sample-image:hover {
   transform: scale(1.1);
-  border: 3px solid var(--light-blue);
-  box-shadow: 0 0 3px 1px var(--light-blue);
+  border: 3px solid var(--medium-blue);
+  box-shadow: 0 0 3px 1px var(--medium-blue);
 }
 /* -----HOME STYLES END----- */
 /*  */
