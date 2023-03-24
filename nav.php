@@ -23,7 +23,8 @@
 <body>
     <header>
         <div class="navbar" style="z-index: 10">
-            <div class="flex-item" id="logo">
+            <!-- MADE HIDDEN  -->
+            <div style="visibility: hidden;" class="flex-item" id="logo">
                 <a href="index.php"><img src="images\cook_book_logo.png" alt="cookbook logo"></a>
             </div>
             <div class="flex-item shade tab">
