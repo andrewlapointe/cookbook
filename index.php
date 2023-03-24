@@ -25,38 +25,38 @@
             </div>
             <div class="sample-item">
                 <a href="recipe.php">
-                    <img class="sample-image" src="images/th-928319788" alt="sample image">
+                    <img class="sample-image" src="images/beef_stew.jpg" alt="sample image">
                 </a>
                 <div class="break"></div>
                 <h3>Top Rated</h3>
             </div>
             <div class="sample-item">
                 <a href="recipe.php">
-                    <img class="sample-image" src="images/th-928319788" alt="sample image">
+                    <img class="sample-image" src="images/sushi.jpg" alt="sample image">
                 </a>
                 <div class="break"></div>
                 <h3>Something Different</h3>
             </div>
             <div class="sample-item">
                 <a href="recipe.php">
-                    <img class="sample-image" src="images/th-928319788" alt="sample image">
+                    <img class="sample-image" src="images/english_breakfast.jpg" alt="sample image">
                 </a>
                 <div class="break"></div>
-                <h3>Sample Recipe</h3>
+                <h3>Breakfast</h3>
             </div>
             <div class="sample-item">
                 <a href="recipe.php">
-                    <img class="sample-image" src="images/th-928319788" alt="sample image">
+                    <img class="sample-image" src="images/taiwanese_soup.jpeg" alt="sample image">
                 </a>
                 <div class="break"></div>
-                <h3>Sample Recipe</h3>
+                <h3>Lunch</h3>
             </div>
             <div class="sample-item">
                 <a href="recipe.php">
-                    <img class="sample-image" src="images/th-928319788" alt="sample image">
+                    <img class="sample-image" src="images/pizza.jpeg" alt="sample image">
                 </a>
                 <div class="break"></div>
-                <h3>Sample Recipe</h3>
+                <h3>Dinner</h3>
             </div>
         </div>
     </div>
