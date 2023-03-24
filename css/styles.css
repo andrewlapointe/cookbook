@@ -5,6 +5,7 @@
   --pale-blue: #dbe9ee;
   --medium-blue: #4a6fa5;
   --dark-blue: #166088;
+  --accent-one: #554f7a;
   font-family: "Josefin Sans", sans-serif;
 }
 /*  */
@@ -31,22 +32,35 @@
   align-items: center;
 }
 .navbar .flex-item.shade:hover {
-  background-color: var(--medium-blue);
+  background-color: var(--pale-blue);
+}
+.navbar .flex-item.shade a:hover {
+  color: var(--dark-blue);
 }
 .navbar .search-container:hover {
-  background-color: var(--medium-blue);
+  background-color: var(--pale-blue);
+  color: var(--medium-blue);
 }
 .navbar .search-container:focus {
   background-color: var(--medium-blue);
 }
-.navbar a {
+.navbar .tab a {
   color: white;
   text-decoration: none;
   /* min-width: 100%; */
-  padding-top: 15px;
-  padding-bottom: 15px;
+  padding-top: 28px;
+  padding-bottom: 28px;
   padding-left: 20px;
   padding-right: 20px;
+  /* transition: color 0.2s; */
+}
+#logo a img {
+  position: absolute;
+  top: 0;
+  left: 550px;
+  bottom: 0;
+  right: 0;
+  max-height: 80px;
 }
 .button {
   padding-left: 32px;
@@ -192,6 +206,14 @@ a {
 main {
   flex: 1 0 auto;
 }
+.accent-border-left {
+  border-left: 2px solid var(--accent-one);
+}
+.flex-center {
+  display: flex;
+  justify-content: center;
+  margin: auto;
+}
 /* -----GENERAL STYLES END----- */
 /*  */
 /*  */
@@ -237,6 +259,8 @@ div.banner {
   margin-bottom: 80px;
   max-width: 75%;
   justify-content: center;
+  /* background-color: #554f7a; */
+  /* opacity: 90%; */
 }
 .sample-item {
   display: flex;
@@ -253,15 +277,15 @@ div.banner {
 }
 .sample-image {
   width: 100%;
-  border: 3px solid var(--medium-blue);
+  border: 3px solid var(--accent-one);
   /* border-image: linear-gradient(var(--light-blue), #4a6fa5) 30; */
   border-style: solid;
   transition: transform 0.5s;
 }
 .sample-image:hover {
   transform: scale(1.1);
-  border: 3px solid var(--medium-blue);
-  box-shadow: 0 0 3px 1px var(--medium-blue);
+  border: 3px solid var(--accent-one);
+  box-shadow: 0 0 3px 1px var(--accent-one);
 }
 /* -----HOME STYLES END----- */
 /*  */

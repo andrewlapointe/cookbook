@@ -5,9 +5,10 @@ Fonts are separated by a | */
 
 :root {
   /* change the values below to your colors from your palette */
-  --primary-color: #333;
-  --secondary-color: #2196f3;
-  --accent1-color: #0b7dda;
+  --primary-color: #4f6d7a;
+  --secondary-color: #c0d6df;
+  --accent1-color: #dbe9ee;
+  --accent2-color: #4a6fa5;
 
   /* change the values below to your chosen font(s) */
   --heading-font: "Josefin Sans";

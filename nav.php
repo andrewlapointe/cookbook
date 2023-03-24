@@ -24,21 +24,24 @@
     <header>
         <div class="navbar" style="z-index: 10">
             <div class="flex-item" id="logo">
-                <a href="index.php">Mom's Cookbook</a>
+                <a href="index.php"><img src="images\cook_book_logo.png" alt="cookbook logo"></a>
             </div>
-            <div class="flex-item shade">
+            <div class="flex-item shade tab">
+                <a href="index.php">Home</a>
+            </div>
+            <div class="flex-item shade tab">
                 <a href="all-recipes.php">All Recipes</a>
             </div>
-            <div class="flex-item shade">
+            <div class="flex-item shade tab">
                 <a href="recipe.php">Recipe</a>
             </div>
-            <div class="flex-item shade">
+            <div class="flex-item shade tab">
                 <a href="insert.php">Insert</a>
             </div>
-            <div class="flex-item shade" style="display:flex; justify-self: center;">
+            <div class="flex-item shade tab" style="display:flex; justify-self: center;">
                 <a href="contact.php" target="_blank">Contact Us</a>
             </div>
-            <div class="search-container flex-item">
+            <div class="search-container flex-item shade tab">
                 <form action="/search" method="get">
                     <input class="search expandright" id="searchleft" type="search" name="q" placeholder="     Search">
                     <label class="button searchbutton" for="searchleft">

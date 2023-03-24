@@ -49,10 +49,10 @@
         </tr>
         <!-- Replace the numbers in the boxes below with your hex color codes. Then switch to the site-plan.css file and change your colors there as well. -->
         <tr>
-            <td class="primary">[#9BA2FF]</td>
-            <td class="secondary">[#A499BE]</td>
-            <td class="accent1">[#9E8576]</td>
-            <td class="accent2">[#7A542E]</td>
+            <td class="primary">[#4f6d7a]</td>
+            <td class="secondary">[#c0d6df]</td>
+            <td class="accent1">[#dbe9ee]</td>
+            <td class="accent2">[#4a6fa5]</td>
         </tr>
     </table>
 
