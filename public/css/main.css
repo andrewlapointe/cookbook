@@ -1,0 +1,40 @@
+html {
+    margin: 0;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    min-height: 100%;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+}
+main {
+    flex: 1 0 auto;
+}
+footer {
+    align-self: flex-end;
+    align-self: flex-end;
+    flex-shrink: 1;
+}
+
+/* Account Registration and Login */
+.form-container {
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    -webkit-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    p {
+        margin-top: 8px;
+    }
+}
+.form-container h2 {
+    margin-bottom: 20px;
+}
