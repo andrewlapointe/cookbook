@@ -30,7 +30,6 @@ accountModel.registerNewAccount = async function (
         username: username,
         password_hash: password_hash,
     };
-    console.log(JSON.stringify(data));
     const result = await api.post('/user/new', JSON.stringify(data));
     return result;
 };

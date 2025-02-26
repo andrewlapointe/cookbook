@@ -134,7 +134,7 @@ accountController.accountLogin = async function (req, res) {
                 delete accountData.data[0].password_hash;
                 const accessToken = jwt.sign(
                     accountData.data[0],
-                    process.env.SESSION_SECRET,
+                    process.env.TOKEN_SECRET,
                     { expiresIn: 3600 }
                 );
                 if (process.env.NODE_ENV === 'development') {

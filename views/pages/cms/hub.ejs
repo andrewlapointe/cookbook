@@ -1,3 +1,91 @@
 <h1>CMS Hub</h1>
 
 <p>Welcome</p>
+<div>
+  <button onclick="toggleActiveElement('add-container', ['edit-container', 'delete-container'])">Add Recipe</button>
+  <button onclick="toggleActiveElement('edit-container', ['add-container', 'delete-container'])">Edit Recipe</button>
+  <button onclick="toggleActiveElement('delete-container', ['add-container', 'edit-container'])">Delete Recipe</button>
+</div>
+
+
+<div id="add-container" class="container my-5">
+  <h1 class="mb-4">Add a New Recipe</h1>
+
+  <!-- Example: Display error messages (if any) -->
+  <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+  <div class="alert alert-danger">
+    <ul>
+      <% errors.forEach(function(error) { %>
+      <li><%= error %></li>
+      <% }); %>
+    </ul>
+  </div>
+  <% } %>
+
+  <form action="/cms/recipe/new" method="POST">
+    <!-- Recipe Name -->
+    <div class="mb-3">
+      <label for="recipeName" class="form-label">Recipe Name</label>
+      <input type="text" class="form-control" id="recipeName" name="recipeName" placeholder="Enter recipe name" required />
+    </div>
+
+    <!-- Recipe Author -->
+    <div class="mb-3">
+      <label for="author" class="form-label">Author</label>
+      <input type="text" class="form-control" id="author" name="author" placeholder="Enter Author name" />
+    </div>
+
+    <!-- Description -->
+    <div class="mb-3">
+      <label for="description" class="form-label">Short Description</label>
+      <textarea class="form-control" id="description" name="description" rows="2" placeholder="Brief description of the recipe"></textarea>
+    </div>
+
+    <!-- Ingredients -->
+    <div class="mb-3">
+      <label for="ingredients" class="form-label">Ingredients</label>
+      <textarea class="form-control" id="ingredients" name="ingredients" rows="3" placeholder="List of ingredients (one per line, or comma separated)" required></textarea>
+    </div>
+
+    <!-- Instructions -->
+    <div class="mb-3">
+      <label for="instructions" class="form-label">Instructions</label>
+      <textarea class="form-control" id="instructions" name="instructions" rows="5" placeholder="Step-by-step cooking instructions"></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label for="cookTime" class="form-label">Cook Time</label>
+      <input class="form-control" id="cookTime" name="cookTime" placeholder="Enter approximate cook time" />
+    </div>
+
+    <div class="mb-3">
+      <label for="servings" class="form-label">Servings</label>
+      <input type="number" class="form-control" id="servings" name="servings" placeholder="Enter approximate servings" />
+    </div>
+
+    <!-- Image URL -->
+    <div class="mb-3">
+      <label for="imageURL" class="form-label">Image URL</label>
+      <input type="url" class="form-control" id="imageURL" name="imageURL" placeholder="Enter an image URL" />
+    </div>
+
+    <!-- User ID -->
+    <div class="mb-3" style="display: none;">
+      <label for=" userId" class="form-label"></label>
+      <input type="url" class="form-control" id="userId" name="userId" value="<%- user %>" readonly />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Recipe</button>
+  </form>
+</div>
+
+<div id="edit-container">
+  <p>edit form</p>
+</div>
+
+<div id="delete-container">
+  <p>delete form</p>
+</div>
+
+<!-- Bootstrap JS (Optional, but useful for components) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

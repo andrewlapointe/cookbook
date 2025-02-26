@@ -5,13 +5,15 @@
   <%- include('../partials/head') %>
 </head>
 
-<body>
+<body onload="flash()">
   <header>
     <%- include('../partials/header') %>
   </header>
 
-  <main class="content">
-    <%- messages() %>
+  <main class="content container">
+    <div class="container">
+      <%- messages() %>
+    </div>
     <%- body %>
     <!-- This is where the content of each view will be injected -->
   </main>

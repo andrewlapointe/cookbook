@@ -11,5 +11,22 @@ cmsRouter.get(
     utilities.checkLogin,
     utilities.handleErrors(cmsController.buildHub)
 );
+cmsRouter.post(
+    '/recipe/new',
+    utilities.checkLogin,
+    utilities.handleErrors(cmsController.createRecipe)
+);
+
+cmsRouter.put(
+    '/recipe/edit',
+    utilities.checkLogin,
+    utilities.handleErrors(cmsController.buildHub)
+);
+
+cmsRouter.delete(
+    '/recipe/delete',
+    utilities.checkLogin,
+    utilities.handleErrors(cmsController.buildHub)
+);
 
 module.exports = cmsRouter;
