@@ -5,7 +5,7 @@ const axios = require('axios');
 
 baseController.buildHome = async function (req, res) {
     //   const nav = await utilities.getNav();
-    req.flash('notice', 'This is a flash message.');
+    // req.flash('notice', 'This is a flash message.');
     res.render('pages/index', { title: 'Home' });
 };
 

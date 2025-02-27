@@ -1,12 +1,11 @@
 <h1>CMS Hub</h1>
 
-<p>Welcome</p>
+<p>Welcome <%= username %></p>
 <div>
   <button onclick="toggleActiveElement('add-container', ['edit-container', 'delete-container'])">Add Recipe</button>
   <button onclick="toggleActiveElement('edit-container', ['add-container', 'delete-container'])">Edit Recipe</button>
   <button onclick="toggleActiveElement('delete-container', ['add-container', 'edit-container'])">Delete Recipe</button>
 </div>
-
 
 <div id="add-container" class="container my-5">
   <h1 class="mb-4">Add a New Recipe</h1>
@@ -83,9 +82,22 @@
   <p>edit form</p>
 </div>
 
-<div id="delete-container">
-  <p>delete form</p>
+<div id="delete-container" class="container">
+  <div id="delete-selection">
+    <ul>
+      <% userRecipes.forEach(recipe => { %>
+      <li><%= recipe.title %>
+        <div style="display: inline;">
+          <button onclick="showConfirmModal('Are you sure you want to delete the <%= recipe.title %> recipe? This cannot be undone.', 
+          function() {fetch('/cms/recipe/delete/<%= recipe.id %>', { method: 'DELETE' })})">
+            Delete
+          </button>
+        </div>
+      </li>
+
+      <% }) %>
+    </ul>
+  </div>
 </div>
 
-<!-- Bootstrap JS (Optional, but useful for components) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<%- include('../../partials/confirmationModal') %>

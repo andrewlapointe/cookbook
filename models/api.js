@@ -28,7 +28,6 @@ class API {
     async post(route, body, auth) {
         // console.log(`AUTHORIZATION: ${auth}`);
         header_data.headers['authorization'] = auth;
-        console.log(header_data);
         const apiResponse = await axios.post(
             process.env.API_PATH_PREFIX + route,
             body,
@@ -48,7 +47,7 @@ class API {
         const apiResponse = await axios.put(
             process.env.API_PATH_PREFIX + route,
             body,
-            headers
+            header_data
         );
         return apiResponse;
     }
@@ -57,14 +56,19 @@ class API {
      *
      * @param {string} route
      * @param {json} body
+     * @param {string} auth JWT token from login
      * @returns {json}
      */
-    async delete(route, body) {
+    async delete(route, body, auth) {
+        header_data.headers['authorization'] = auth;
         const apiResponse = await axios.delete(
             process.env.API_PATH_PREFIX + route,
-            body,
-            headers
+            {
+                headers: header_data.headers,
+                data: body,
+            }
         );
+        delete header_data.headers['authorization'];
         return apiResponse;
     }
 }

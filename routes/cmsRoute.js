@@ -24,9 +24,9 @@ cmsRouter.put(
 );
 
 cmsRouter.delete(
-    '/recipe/delete',
+    '/recipe/delete/:id',
     utilities.checkLogin,
-    utilities.handleErrors(cmsController.buildHub)
+    utilities.handleErrors(cmsController.deleteRecipe)
 );
 
 module.exports = cmsRouter;
