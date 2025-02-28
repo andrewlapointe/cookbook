@@ -22,7 +22,12 @@ cmsController.deleteRecipe = async function (req, res) {
         { recipeId: req.params.id },
         req.cookies['jwt']
     );
-    res.status(204);
+    res.status(204).redirect('/cms/hub');
+};
+
+cmsController.editRecipe = async function (req, res, next) {
+    result = await cmsModel.editRecipe(req.body, req.cookies['jwt']);
+    res.status(204).redirect('/cms/hub');
 };
 
 module.exports = cmsController;

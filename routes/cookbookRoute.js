@@ -8,4 +8,9 @@ cookbookRouter.get(
     utilities.handleErrors(cookbookController.allRecipes)
 );
 
+cookbookRouter.get(
+    '/recipe/:id',
+    utilities.handleErrors(cookbookController.getRecipeById)
+);
+
 module.exports = cookbookRouter;

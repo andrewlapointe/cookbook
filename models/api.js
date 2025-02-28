@@ -26,7 +26,6 @@ class API {
      * @returns {json}
      */
     async post(route, body, auth) {
-        // console.log(`AUTHORIZATION: ${auth}`);
         header_data.headers['authorization'] = auth;
         const apiResponse = await axios.post(
             process.env.API_PATH_PREFIX + route,
@@ -43,12 +42,14 @@ class API {
      * @param {json} body
      * @returns {json}
      */
-    async put(route, body) {
+    async put(route, body, auth) {
+        header_data.headers['authorization'] = auth;
         const apiResponse = await axios.put(
             process.env.API_PATH_PREFIX + route,
             body,
             header_data
         );
+        delete header_data.headers['authorization'];
         return apiResponse;
     }
 

@@ -5,7 +5,7 @@
     <% recipes.forEach(recipe => { %>
     <div class="col">
       <div class="card recipe-card shadow-sm">
-        <a href="/recipe/<%= recipe.id %>" class="text-decoration-none text-dark">
+        <a href="/cookbook/recipe/<%= recipe.id %>" class="text-decoration-none text-dark">
           <img src="<%= recipe.imageUrl %>" class="card-img-top" alt="Image of <%= recipe.title %>">
           <div class="card-body">
             <h5 class="card-title"><%= recipe.title %></h5>

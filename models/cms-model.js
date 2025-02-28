@@ -22,4 +22,9 @@ cmsModel.deleteRecipe = async function (data, auth) {
     return result;
 };
 
+cmsModel.editRecipe = async function (data, auth) {
+    const result = await api.put('/recipe/edit', JSON.stringify(data), auth);
+    return result;
+};
+
 module.exports = cmsModel;

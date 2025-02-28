@@ -12,4 +12,13 @@ cookbookController.allRecipes = async function (req, res, next) {
     });
 };
 
+cookbookController.getRecipeById = async function (req, res) {
+    const result = await cookbookModel.getRecipeById(req.params.id);
+
+    res.render('pages/cookbook/recipe-page', {
+        title: result.data.rows.title,
+        recipe: result.data.rows[0],
+    });
+};
+
 module.exports = cookbookController;

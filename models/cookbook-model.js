@@ -8,4 +8,9 @@ cookbookModel.allRecipes = async function () {
     return result;
 };
 
+cookbookModel.getRecipeById = async function (id) {
+    const result = await api.get(`/recipe/${id}`);
+    return result;
+};
+
 module.exports = cookbookModel;

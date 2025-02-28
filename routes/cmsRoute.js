@@ -17,10 +17,10 @@ cmsRouter.post(
     utilities.handleErrors(cmsController.createRecipe)
 );
 
-cmsRouter.put(
+cmsRouter.post(
     '/recipe/edit',
     utilities.checkLogin,
-    utilities.handleErrors(cmsController.buildHub)
+    utilities.handleErrors(cmsController.editRecipe)
 );
 
 cmsRouter.delete(
