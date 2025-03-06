@@ -38,3 +38,59 @@ footer {
 .form-container h2 {
     margin-bottom: 20px;
 }
+
+/* Flash */
+#messages {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    ul {
+        list-style: none;
+        margin: 0;
+    }
+}
+
+/* Home Page */
+div#banner {
+    position: relative;
+    width: 100%;
+    margin-top: -16px;
+
+    h1 {
+        position: absolute;
+        left: 0;
+        right: 0;
+        margin-inline: auto;
+        width: fit-content;
+    }
+
+    img#hero-image {
+        width: 100%;
+        height: 500px;
+        object-fit: cover;
+        object-position: center 85%;
+    }
+
+    div#banner-search-container {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 100px;
+        margin-inline: auto;
+        width: 40%;
+
+        padding: 15px;
+        background-color: rgb(173, 173, 173, 0.8);
+        text-align: center;
+        border-radius: 6px;
+
+        form#banner-search {
+            /* width: 60%; */
+        }
+
+        p {
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+    }
+}

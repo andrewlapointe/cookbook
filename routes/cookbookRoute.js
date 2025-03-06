@@ -13,4 +13,11 @@ cookbookRouter.get(
     utilities.handleErrors(cookbookController.getRecipeById)
 );
 
+cookbookRouter.get(
+    '/search',
+    cookbookController.searchRules(),
+    cookbookController.checkSearchData,
+    utilities.handleErrors(cookbookController.getRecipeSearch)
+);
+
 module.exports = cookbookRouter;

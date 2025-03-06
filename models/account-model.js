@@ -6,7 +6,6 @@ const accountModel = {};
 // TODO
 accountModel.getAccountById = async function (id) {
     const result = 1;
-    console.log(result);
     return result;
 };
 
@@ -15,9 +14,14 @@ accountModel.getAccountByEmail = async function (email) {
     return result;
 };
 
-accountModel.checkAccountExits = async function (email, username) {
-    const result = await api.get(`/checkuser/${email}/${username}`);
-    return result;
+accountModel.checkAccountExitsUsername = async function (username) {
+    const usernameResult = await api.get(`/checkuser/username/${username}`);
+    return usernameResult.data.usernameExists;
+};
+
+accountModel.checkAccountExitsEmail = async function (email) {
+    const emailResult = await api.get(`/checkuser/email/${email}`);
+    return emailResult.data.emailExists;
 };
 
 accountModel.registerNewAccount = async function (

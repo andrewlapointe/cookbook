@@ -13,4 +13,9 @@ cookbookModel.getRecipeById = async function (id) {
     return result;
 };
 
+cookbookModel.getRecipeSearch = async function (query) {
+    const result = await api.get(`/recipe/search/${query}`);
+    return result;
+};
+
 module.exports = cookbookModel;

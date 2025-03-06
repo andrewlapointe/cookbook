@@ -1,9 +1,50 @@
-<h1>Index Page</h1>
+<div id="banner">
+  <h1 class="mt-3">Your Recipes and More</h1>
+  <img id="hero-image" src="/images/spoons-n-spices.jpeg" alt="Banner Image of Spoons">
 
-<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-  sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-  Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
-  ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-  reprehenderit in voluptate velit esse cillum dolore eu fugiat
-  nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-  sunt in culpa qui officia deserunt mollit anim id est laborum. </p>
+  <div id="banner-search-container">
+    <form id="banner-search" class="d-flex" action="/cookbook/search" method="get">
+      <input class="form-control me-2" type="search" name="q" placeholder="Find a recipe..." aria-label="Search">
+      <button class="btn btn-outline-dark" type="submit">Search</button>
+    </form>
+    <p><strong>or</strong></p>
+    <a class="btn btn-primary" href="/cms/hub">Add Your Own</a>
+  </div>
+</div>
+
+<div id="description" class="container d-flex flex-column">
+  <h2 class="mt-4 mb-2">What is Note Card Cookbook?</h2>
+  <p>I come from a family of avid cooks. We love sharing reicpes, but it is hard to keep track of them all.
+    We have websites, printouts, cookbooks, and handwritten note cards from my grandma.
+  </p>
+
+  <p>
+    Note Card Cookbook is a place where we can all easily store and share our favorite recipes. Unlike other
+    recipe sites, here you only see what you want!
+  </p>
+</div>
+
+<div id="featured" class="container d-flex flex-column">
+  <h2 class="mt-4 mb-2">New Recipes From the community</h2>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-4">
+    <% if (recipes.length == 0) { %>
+    <div class="container mt-4">
+      <p class="mx-auto">Sorry, we couldn't find anything that matched your search.</p>
+    </div>
+    <% } else { %>
+    <% recipes.forEach(recipe => { %>
+    <div user-id='<%= recipe.user_id %>' class="col recipe-card">
+      <div class="card shadow-sm h-100">
+        <a href="/cookbook/recipe/<%= recipe.id %>" class="text-decoration-none text-dark">
+          <img src="<%= recipe.image_url %>" class="card-img-top" alt="Image of <%= recipe.title %>">
+          <div class="card-body">
+            <h5 class="card-title"><%= recipe.title %></h5>
+            <p class="card-text">By <%= recipe.author %></p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <% })} %>
+  </div>
+
+</div>

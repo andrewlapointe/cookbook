@@ -1,0 +1,38 @@
+<div class="container">
+  <div class="profile-container">
+    <div class="profile-header">
+      <h1>Profile</h1>
+    </div>
+
+    <div class="profile-section">
+      <h2>Account Data</h2>
+      <p><strong>Username:</strong> <%= accountData.username %></p>
+      <p><strong>Email:</strong> <%= accountData.email %></p>
+    </div>
+
+    <div class="profile-section">
+      <h2>My Lists</h2>
+      <ul>
+        <li><a href="/user/list/favorites">Favorites</a></li>
+        <li><a href="/user/list/weeknightMeals">Weeknight Meals</a></li>
+        <!-- This list can be a variable size. Page should accommodate up to 15 lists -->
+      </ul>
+    </div>
+    <!-- <div class="profile-section">
+      <h2>My Lists</h2>
+      <ul>
+        <% if (userLists.length === 0) { %>
+        <li class="text-muted">No lists found.</li>
+        <% } else { %>
+        <% userLists.forEach(list => { %>
+        <li><a href="/user/list/<%= list.slug %>"><%= list.name %></a></li>
+        <% }) %>
+        <% } %>
+      </ul>
+    </div> -->
+
+    <div>
+      <a class="btn btn-primary btn-manage" href="/cms/hub">Manage Recipes</a>
+    </div>
+  </div>
+</div>

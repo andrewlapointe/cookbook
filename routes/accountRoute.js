@@ -18,11 +18,19 @@ accountRouter.post(
     utilities.handleErrors(accountController.accountLogin)
 );
 
+accountRouter.get('/logout', utilities.handleErrors(accountController.logout));
+
 accountRouter.post(
     '/register',
     accountController.registrationRules(),
     accountController.checkRegData,
     utilities.handleErrors(accountController.submitRegistration)
+);
+
+accountRouter.get(
+    '/profile',
+    utilities.checkLogin,
+    utilities.handleErrors(accountController.buildProfile)
 );
 
 module.exports = accountRouter;

@@ -1,5 +1,5 @@
 const { body, validationResult } = require('express-validator');
-const utilities = require('../utilities/');
+const utils = require('../utilities/');
 const accountModel = require('../models/account-model');
 const API = require('../models/api');
 const { hash, compare } = require('bcrypt');
@@ -10,6 +10,14 @@ const accountController = {};
 
 accountController.buildRegistration = async function (req, res) {
     res.render('pages/account/register', { title: 'Register' });
+};
+
+accountController.buildProfile = async function (req, res) {
+    res.render('pages/account/profile', {
+        title: 'Profile',
+        accountData: res.locals.accountData,
+        userLists: [],
+    });
 };
 
 accountController.buildLogin = async function (req, res) {
@@ -24,7 +32,16 @@ accountController.registrationRules = () => {
             .escape()
             .notEmpty()
             .isLength({ min: 2 })
-            .withMessage('Please provide a first name.'), // on error this message is sent.
+            .withMessage('Please provide a first name.') // on error this message is sent.
+            .custom(async (username) => {
+                const usernameCheck =
+                    await accountModel.checkAccountExitsUsername(username);
+                if (usernameCheck) {
+                    throw new Error(
+                        'Username exists. Please log in or use different email'
+                    );
+                }
+            }),
 
         // valid email is required and cannot already exist in the database
         body('email')
@@ -32,21 +49,13 @@ accountController.registrationRules = () => {
             .isEmail()
             .normalizeEmail() // refer to validator.js docs
             .withMessage('A valid email is required.')
-            .custom(async (email, { req }) => {
-                username = req.body.username;
-                const userCheck = await accountModel.checkAccountExits(
-                    email,
-                    username
+            .custom(async (email) => {
+                const emailCheck = await accountModel.checkAccountExitsEmail(
+                    email
                 );
-                const { emailExists, usernameExists } = userCheck['data'];
-
-                if (emailExists) {
+                if (emailCheck) {
                     throw new Error(
                         'Email exists. Please log in or use different email'
-                    );
-                } else if (usernameExists) {
-                    throw new Error(
-                        'Username exists. Please log in or use different email'
                     );
                 }
             }),
@@ -73,7 +82,8 @@ accountController.checkRegData = async (req, res, next) => {
     let errors = [];
     errors = validationResult(req);
     if (!errors.isEmpty()) {
-        console.log(errors);
+        req.flash('notice', errors.array()[0].msg);
+        utils.logger.log('error', 'Registration Error', errors);
         // let nav = await utilities.getNav();
         res.render('pages/account/register', {
             errors,
@@ -97,12 +107,12 @@ accountController.submitRegistration = async function (req, res) {
             'notice',
             'Sorry, there was an error processing the registration.'
         );
-        res.redirect('/account/register').status(500);
+        res.status(500).redirect('/account/register');
         return;
     }
 
     accountModel.registerNewAccount(email, username, password_hash); // Add success message
-    res.redirect('/account/login', 200);
+    res.status(201).redirect('/account/login');
 };
 
 /* ****************************************
@@ -111,7 +121,7 @@ accountController.submitRegistration = async function (req, res) {
 accountController.accountLogin = async function (req, res) {
     // let nav = await utilities.getNav();
     const { email, password } = req.body;
-    const accountData = await accountModel.getAccountByEmail(email); // Change for API call
+    const accountData = await accountModel.getAccountByEmail(email);
     if (!accountData) {
         req.flash('notice', 'Please check your credentials and try again.');
         res.status(400).redirect('./pages/account/login', {
@@ -140,11 +150,13 @@ accountController.accountLogin = async function (req, res) {
                 if (process.env.NODE_ENV === 'development') {
                     res.cookie('jwt', accessToken, {
                         httpOnly: true,
+                        sameSite: 'strict',
                         maxAge: 3600 * 1000,
                     });
                 } else {
                     res.cookie('jwt', accessToken, {
                         httpOnly: true,
+                        sameSite: 'strict',
                         secure: true,
                         maxAge: 3600 * 1000,
                     });
@@ -167,6 +179,15 @@ accountController.accountLogin = async function (req, res) {
     } catch (error) {
         return new Error('Access Forbidden');
     }
+};
+
+accountController.logout = async function (req, res) {
+    res.locals.loggedin = 0;
+    res.locals.accountData = {};
+    if (req.cookies.jwt) {
+        res.cookie('jwt', '', { maxAge: 0 });
+    }
+    res.redirect('/');
 };
 
 module.exports = accountController;

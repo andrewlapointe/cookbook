@@ -8,3 +8,47 @@
     max-height: 200px;
     object-fit: cover;
 }
+
+div#grid-header {
+    position: relative;
+    button {
+        position: absolute;
+        top: auto;
+        bottom: 0;
+        height: fit-content;
+    }
+}
+
+button.active-custom {
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px, rgb(51, 51, 51) 0px 0px 0px 3px !important;
+}
+
+img#recipe-page-img {
+    max-height: 400px;
+    display: block;
+    margin: 0 auto;
+}
+
+.recipe-container {
+    max-width: 800px;
+}
+
+img#recipe-page-img {
+    /* By default, .img-fluid ensures width:100% and height:auto */
+    /* Remove max-height or set it only if you want a limit */
+    display: block;
+    margin: 0 auto;
+}
+
+/* div#servings-time-container {
+    padding-right: 3em;
+} */
+
+button#print-btn {
+    position: absolute;
+
+    right: 10px;
+    left: auto;
+    top: 10px;
+    bottom: auto;
+}

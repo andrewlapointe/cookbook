@@ -1,0 +1,48 @@
+{"errors":[{"location":"query","msg":"Invalid value","path":"q","type":"field","value":""}],"level":"error","service":"user-service"}
+{"level":"error","message":"Error in Search Query %s","service":"user-service"}
+{"errors":[{"location":"query","msg":"Invalid value","path":"q","type":"field","value":""}],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[{"location":"query","msg":"Invalid value","path":"q","type":"field","value":""}],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[{"location":"body","msg":"Email exists. Please log in or use different email","path":"email","type":"field","value":"andrewrlapointe@gmail.com"}],"level":"error","service":"user-service"}
+{"errors":[{"location":"body","msg":"Email exists. Please log in or use different email","path":"email","type":"field","value":"andrewrlapointe@gmail.com"}],"level":"error","message":"Registration Error","service":"user-service"}
+{"errors":[{"location":"body","msg":"Username exists. Please log in or use different email","path":"username","type":"field","value":"andrewrlapointe"}],"level":"error","message":"Registration Error","service":"user-service"}
+{"errors":[{"location":"body","msg":"Username exists. Please log in or use different email","path":"username","type":"field","value":"andrewrlapointe"}],"level":"error","message":"Registration Error","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[{"location":"query","msg":"Invalid value","path":"q","type":"field","value":""}],"level":"error","message":"Error in Search Query","service":"user-service"}
