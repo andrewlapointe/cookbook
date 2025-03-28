@@ -12,9 +12,6 @@ cmsController.buildHub = async function (req, res) {
         const ingedients = await cmsModel.getRecipeIngredientsById(id);
         recipeData[i].ingredients = ingedients.data.rows;
     }
-
-    console.log(recipeData[0]);
-
     // const ingredients = await cmsModel.getAllIngredients();
     const units = await cmsModel.getAllUnits();
 
@@ -29,7 +26,6 @@ cmsController.buildHub = async function (req, res) {
 };
 
 cmsController.createRecipe = async function (req, res) {
-    console.log(req.body);
     await cmsModel.createNewRecipe(req.body, req.cookies['jwt']);
     res.status(201).redirect('/cms/hub');
 };

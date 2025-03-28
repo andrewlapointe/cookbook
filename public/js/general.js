@@ -161,11 +161,6 @@ showAddListItem = () => {
 showUserList = (list_element) => {
     const id = list_element.list - id;
     const name = list_element.list - name;
-
-    console.log(id, name);
-};
-profileLoaded = () => {
-    console.log('loaded');
 };
 
 // displays user list contents on profile page
@@ -176,7 +171,7 @@ $('.list-name-group').on('click', (event) => {
 
 removeRecipeFromListClient = (recipe_id, list_id) => {
     $.ajax({
-        url: prefix + '/account/list/removerecipe',
+        url: '/account/list/removerecipe',
         type: 'DELETE',
         data: {
             listId: list_id,
@@ -201,9 +196,6 @@ showAllLists = () => {
     $('ul#user-lists-ul').parent().css('display', 'block');
 };
 
-// REMOVE FOR PRODUCTION
-const prefix = 'http://localhost:5500';
-
 confirmDeleteList = (aTag) => {
     const listId = aTag.getAttribute('data-list-id');
     const listName = aTag.getAttribute('data-list-name');
@@ -226,7 +218,7 @@ addUserList = () => {
             url = $form.attr('action');
 
         let posting = $.ajax({
-            url: prefix + url,
+            url: url,
             type: 'POST',
             data: { listName: term },
             dataType: 'json',
@@ -297,11 +289,10 @@ buildSaveRecipeModal = () => {
         }
         // Convert the object to a JSON string
         const jsonData = JSON.stringify(formData);
-        console.log(jsonData);
 
         $.ajax({
             type: 'POST',
-            url: prefix + formUrl,
+            url: formUrl,
             data: jsonData,
             processData: false, // Prevent jQuery from processing the data
             contentType: 'application/json', // Let the browser set the content type
@@ -312,6 +303,5 @@ buildSaveRecipeModal = () => {
 };
 
 saveButtonOn = (userLists, recipeId) => {
-    console.log('This actually got called');
     $('i#saveIcon').removeClass().addClass('fa-solid fa-bookmark mx-2');
 };

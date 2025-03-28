@@ -251,8 +251,6 @@ accountController.deleteList = async function (req, res) {
 accountController.addRecipeToLists = async function (req, res) {
     const recipeId = req.params.id;
     const lists = req.body;
-    console.log(lists[0]);
-    console.log(recipeId);
 
     let worstResponse = -1;
 
