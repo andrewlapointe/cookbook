@@ -104,7 +104,7 @@
   });
 </script>
 
-<% if (userLists.some(list => list.recipes.some(r => r.id === recipe.id))){ %>
+<% if (userLists && userLists.some(list => list.recipes.some(r => r.id === recipe.id))){ %>
 <script defer>
   document.addEventListener('DOMContentLoaded', () => {
     saveButtonOn()
