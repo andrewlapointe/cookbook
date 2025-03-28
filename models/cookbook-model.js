@@ -13,6 +13,11 @@ cookbookModel.getRecipeById = async function (id) {
     return result;
 };
 
+cookbookModel.getRecipeIngredientsById = async function (id) {
+    const result = await api.get(`/recipe/${id}/ingredients`);
+    return result;
+};
+
 cookbookModel.getRecipeSearch = async function (query) {
     const result = await api.get(`/recipe/search/${query}`);
     return result;

@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const static = require('./routes/static');
 const route = require('./routes/baseRoute');
 const utilities = require('./utilities/index');
+// const jquery = require('jquery');
 
 const cookieParser = require('cookie-parser');
 

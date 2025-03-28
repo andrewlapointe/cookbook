@@ -10,7 +10,7 @@
 
 <div class="container mt-5 mb-5">
   <div id="add-container" class="container">
-    <div class="card shadow p-3">
+    <div class="card shadow p-4">
       <h2 class="mb-4">Add a New Recipe</h2>
       <form action="/cms/recipe/new" method="POST">
         <!-- Recipe Name -->
@@ -33,8 +33,41 @@
 
         <!-- Ingredients -->
         <div class="mb-3">
-          <label for="ingredients" class="form-label">Ingredients</label>
-          <textarea class="form-control" id="ingredients" name="ingredients" rows="3" placeholder="List of ingredients (one per line, or comma separated)" required></textarea>
+          <div id="add-ingredient-container">
+            <!-- <h3 class="border-bottom border-dark pb-1 mb-2">Ingredients</h3> -->
+            <div id="ingredient-row" class="row">
+              <div class="col">
+                <label for="ingredient" class="form-label">Ingredient Name...</label>
+                <input class="form-control" name="ingredient" type="text" list="ingredient-list" placeholder="Ingredient Name" required rows="3">
+                <datalist id="ingredient-list">
+                  <% for (let i = 0; i < 500; i++) { %>
+                  <option value="<%= i %>"></option>
+                  <% } %>
+                </datalist>
+              </div>
+              <div class="col-3">
+                <label for="ingredientAmount" class="form-label">Amount...</label>
+                <input class="form-control" type="text" name="ingredientAmount" id="ingredientAmount" placeholder="Ingredient Amount">
+              </div>
+              <div class="col-2">
+                <label class="form-label" for="ingredientUnit">Unit</label>
+                <select class="form-control" name="ingredientUnit" id="ingredientUnit">
+                  <option value="" selected disabled hidden>Unit...</option>
+                  <% units.forEach( unit => { %>
+                  <option value="<%= unit.name %>"><%= unit.name %></option>
+                  <% }) %>
+                </select>
+              </div>
+              <div class="col-2">
+                <!-- This label has an empty character to keep the spacing consistent. Might be a cleaner way to do this. -->
+                <label for="remove-btn" class="form-label">&nbsp;</label>
+                <button type="button" id="remove-btn" class="btn btn-danger form-control" style="visibility: hidden;">
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary mt-2" onclick="cmsAddIngredient('add-ingredient-container')">Add Ingredient</button>
         </div>
 
         <!-- Instructions -->
@@ -44,8 +77,8 @@
         </div>
 
         <div class="mb-3">
-          <label for="cookTime" class="form-label">Cook Time</label>
-          <input class="form-control" id="cookTime" name="cookTime" placeholder="Enter approximate cook time" />
+          <label for="cookTime" class="form-label">Cook Time (Minutes)</label>
+          <input class="form-control" id="cookTime" type="number" name="cookTime" placeholder="Enter approximate cook time" />
         </div>
 
         <div class="mb-3">
@@ -72,7 +105,7 @@
 
 
   <div id="edit-container" class="container" style="display: none;">
-    <div id="edit-selection" class="card shadow p-3">
+    <div id="edit-selection" class="card shadow p-4">
       <h2 id="edit-h2" class="mb-4">Edit Recipe</h2>
 
       <ul id="edit-list" class="list-group list-group-flush">
@@ -83,7 +116,7 @@
         <li class="list-group-item d-flex justify-content-between align-items-center">
           <span><%= recipe.title %></span>
           <div style="display: inline;">
-            <button class="btn btn-warning btn-sm" data-recipe='<%- JSON.stringify(recipe) %>' onclick="fillEditForm(this)">
+            <button class="btn btn-warning btn-sm" data-recipe='<%- JSON.stringify(recipe) %>' data-units="<%- JSON.stringify(units) %>" onclick="fillEditForm(this)">
               Edit
             </button>
           </div>
@@ -113,8 +146,41 @@
 
         <!-- Ingredients -->
         <div class="mb-3">
-          <label for="ingredients" class="form-label">Ingredients</label>
-          <textarea class="form-control" id="editIngredients" name="ingredients" rows="3" placeholder="List of ingredients (one per line, or comma separated)" required></textarea>
+          <div id="edit-ingredient-container">
+            <!-- <h3 class="border-bottom border-dark pb-1 mb-2">Ingredients</h3> -->
+            <div id="edit-ingredient-row" class="row">
+              <div class="col">
+                <label for="ingredient" class="form-label">Ingredient</label>
+                <input id="editIngredientName" class="form-control" name="ingredient" type="text" list="ingredient-list" placeholder="Ingredient Name" required rows="3">
+                <datalist id="ingredient-list">
+                  <% for (let i = 0; i < 500; i++) { %>
+                  <option value="<%= i %>"></option>
+                  <% } %>
+                </datalist>
+              </div>
+              <div class="col-3">
+                <label for="ingredientAmount" class="form-label">Amount</label>
+                <input class="form-control" type="text" name="ingredientAmount" id="editIngredientAmount" placeholder="Ingredient Amount">
+              </div>
+              <div class="col-2">
+                <label class="form-label" for="ingredientUnit">Unit</label>
+                <select class="form-control" name="ingredientUnit" id="editIngredientUnit">
+                  <option value="" selected disabled hidden>Unit</option>
+                  <% units.forEach( unit => { %>
+                  <option value="<%= unit.name %>"><%= unit.name %></option>
+                  <% }) %>
+                </select>
+              </div>
+              <div class="col-2">
+                <!-- This label has an empty character to keep the spacing consistent. Might be a cleaner way to do this. -->
+                <label for="remove-btn" class="form-label">&nbsp;</label>
+                <button type="button" id="remove-btn" class="btn btn-danger form-control" onclick="cmsRemoveIngredient(this)">
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary mt-2" onclick="cmsAddIngredient('edit-ingredient-container')">Add Ingredient</button>
         </div>
 
         <!-- Instructions -->
@@ -145,7 +211,7 @@
           <input type="number" class="form-control" id="userId" name="userId" value="<%- user %>" readonly />
         </div>
 
-        <!-- User ID -->
+        <!-- Recipe ID -->
         <div class="mb-3" style="display: none;">
           <label for="id" class="form-label"></label>
           <input type="number" class="form-control" id="editRecipeId" name="id" readonly />
@@ -157,20 +223,22 @@
   </div>
 
   <div id="delete-container" class="container" style="display: none;">
-    <div id="delete-selection" class="card shadow p-3">
+    <div id="delete-selection" class="card shadow p-4">
       <h2 class="mb-4">Delete Recipe</h2>
       <ul class="list-group list-group-flush">
         <% if (userRecipes.length === 0) { %>
         <li class="list-group-item text-muted text-center">No recipes found.</li>
         <% } else { %>
         <% userRecipes.forEach(recipe => { %>
-        <li class="list-group-item d-flex justify-content-between align-items-center">
+        <li id="deleteRecipe<%= recipe.id %>" class="list-group-item d-flex justify-content-between align-items-center">
           <span><%= recipe.title %></span>
           <div style="display: inline;">
             <button class="btn btn-danger btn-sm" onclick="showConfirmModal('Are you sure you want to delete the <%= recipe.title %> recipe? This cannot be undone.', 
-              function() {fetch('/cms/recipe/delete/<%= recipe.id %>', { method: 'DELETE' })})">
+              function() {fetch('/cms/recipe/delete/<%= recipe.id %>', { method: 'DELETE' });
+                          $(`li#deleteRecipe${'<%= recipe.id %>'}`).remove();})">
               Delete
             </button>
+
           </div>
         </li>
 

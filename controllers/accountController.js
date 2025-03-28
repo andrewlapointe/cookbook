@@ -4,6 +4,7 @@ const accountModel = require('../models/account-model');
 const API = require('../models/api');
 const { hash, compare } = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { Pool } = require('pg');
 const env = require('dotenv').config();
 
 const accountController = {};
@@ -13,10 +14,21 @@ accountController.buildRegistration = async function (req, res) {
 };
 
 accountController.buildProfile = async function (req, res) {
+    const userLists = await accountModel.getUserLists(
+        res.locals.accountData.id,
+        req.cookies['jwt']
+    );
+
+    userLists.data.rows.forEach((list) => {
+        if (list.recipes[0].id === null) {
+            delete list.recipes;
+        }
+    });
+
     res.render('pages/account/profile', {
         title: 'Profile',
         accountData: res.locals.accountData,
-        userLists: [],
+        userLists: userLists.data.rows,
     });
 };
 
@@ -188,6 +200,98 @@ accountController.logout = async function (req, res) {
         res.cookie('jwt', '', { maxAge: 0 });
     }
     res.redirect('/');
+};
+
+accountController.listNameRules = () => {
+    return [
+        body('listName')
+            .trim()
+            .escape()
+            .notEmpty()
+            .isLength({ min: 1 })
+            .withMessage('List name error.'), // on error this message is sent.
+    ];
+};
+
+accountController.checkListNameRules = async (req, res, next) => {
+    const { listName } = req.body;
+    let errors = [];
+    errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        req.flash('notice', errors.array()[0].msg);
+        utils.logger.log('error', 'Submission Error', errors);
+        // let nav = await utilities.getNav();
+        return;
+    }
+    next();
+};
+
+accountController.addList = async function (req, res) {
+    const { listName } = req.body;
+    const data = await accountModel.addUserList(
+        listName,
+        res.locals.accountData.id,
+        req.cookies['jwt']
+    );
+    res.send(data.data.rows);
+};
+
+accountController.getList = async function (req, res) {
+    const id = req.params.id;
+    const response = await accountModel.getList(id, req.cookies['jwt']);
+    res.send(response.data.rows);
+};
+
+accountController.deleteList = async function (req, res) {
+    const id = req.params.id;
+    const response = await accountModel.deleteList(id, req.cookies['jwt']);
+    res.send(response.data.rows);
+};
+
+accountController.addRecipeToLists = async function (req, res) {
+    const recipeId = req.params.id;
+    const lists = req.body;
+    console.log(lists[0]);
+    console.log(recipeId);
+
+    let worstResponse = -1;
+
+    for (let i = 0; i < Object.keys(lists).length; i++) {
+        let response;
+        if (lists[i].value === true) {
+            response = await accountModel.addRecipeToList(
+                {
+                    list_id: lists[i].id,
+                    recipe_id: recipeId,
+                },
+                req.cookies['jwt']
+            );
+        } else {
+            response = await accountModel.removeRecipeFromList(
+                {
+                    list_id: lists[i].id,
+                    recipe_id: recipeId,
+                },
+                req.cookies['jwt']
+            );
+        }
+
+        if (response > worstResponse) {
+            worstResponse = response;
+        }
+    }
+    res.status(worstResponse); // TODO: Change this to actually check for a success
+};
+
+accountController.removeRecipeFromList = async function (req, res) {
+    const { listId, recipeId } = req.body;
+
+    const response = await accountModel.removeRecipeFromList(
+        { list_id: listId, recipe_id: recipeId },
+        req.cookies['jwt']
+    );
+
+    res.sendStatus(response);
 };
 
 module.exports = accountController;

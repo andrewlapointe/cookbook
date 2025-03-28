@@ -1,38 +1,118 @@
 <div class="container">
-  <div class="profile-container">
-    <div class="profile-header">
-      <h1>Profile</h1>
-    </div>
+  <div class="grid">
+    <div class="row row-cols-1 row-cols-lg-2 g-4 mt-3">
+      <div id="profile" class="col">
+        <div class="card shadow-sm">
+          <div class="profile-header mt-2">
+            <h1>Profile</h1>
+          </div>
+          <div class="card-body">
+            <div class="profile-section">
+              <h2>Account Data</h2>
+              <p><strong>Username:</strong> <%= accountData.username %></p>
+              <p><strong>Email:</strong> <%= accountData.email %></p>
+            </div>
+            <div>
+              <a class="btn btn-primary btn-manage" href="/cms/hub">Manage Recipes</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card shadow-sm">
+          <div class="profile-header mt-2">
+            <h1 id="list-header">My Lists</h1>
+          </div>
 
-    <div class="profile-section">
-      <h2>Account Data</h2>
-      <p><strong>Username:</strong> <%= accountData.username %></p>
-      <p><strong>Email:</strong> <%= accountData.email %></p>
-    </div>
 
-    <div class="profile-section">
-      <h2>My Lists</h2>
-      <ul>
-        <li><a href="/user/list/favorites">Favorites</a></li>
-        <li><a href="/user/list/weeknightMeals">Weeknight Meals</a></li>
-        <!-- This list can be a variable size. Page should accommodate up to 15 lists -->
-      </ul>
-    </div>
-    <!-- <div class="profile-section">
-      <h2>My Lists</h2>
-      <ul>
-        <% if (userLists.length === 0) { %>
-        <li class="text-muted">No lists found.</li>
-        <% } else { %>
-        <% userLists.forEach(list => { %>
-        <li><a href="/user/list/<%= list.slug %>"><%= list.name %></a></li>
-        <% }) %>
-        <% } %>
-      </ul>
-    </div> -->
 
-    <div>
-      <a class="btn btn-primary btn-manage" href="/cms/hub">Manage Recipes</a>
+          <div class="card-body">
+            <div class="profile-section">
+
+              <div>
+                <ul id="user-lists-ul">
+                  <% userLists.forEach( (list) => { %>
+                  <li class="userListLi" id="userList<%= list.id %>" style="padding: 0;">
+                    <div class="d-flex align-items-center">
+                      <a class="list-name-group my-0 mx-0 py-2 px-2" data-list-id="<%= list.id %>" data-list-name="<%= list.list_name %>"><%- list.list_name %></a>
+                      <div class="mx-2 ml-auto dropdown">
+                        <button class="btn border-none" type="button" id="dropdownMenuButton<%= list.id %>" data-bs-toggle="dropdown" aria-expanded="false">
+                          <i class="fa-solid fa-ellipsis-vertical"></i>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton<%= list.id %>">
+                          <a class="dropdown-item" data-list-id="<%= list.id %>" data-list-name="<%= list.list_name %>" onclick="confirmDeleteList(this)">Delete</a>
+                          <a class="dropdown-item disabled" href="#">Edit Name</a>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                  <% }) %>
+                  <li id="add-list-item" style="display: none;">
+                    <form id="add-list-form" action="/account/addlist">
+                      <label class="form-label" style="display: none;">New List Name</label>
+                      <div class="d-flex justify-content-between align-items-center">
+
+                        <input class="form-control" type="text" name="listName" id="listName" placeholder="New List Name">
+
+                        <button id="add-list-button" class="btn btn-primary" type="submit">Add</button>
+                      </div>
+                    </form>
+                  </li>
+                </ul>
+                <div class="d-flex mb-3">
+                  <button onclick="showAddListItem()" class="btn btn-primary">Create List</button>
+                </div>
+              </div>
+
+              <div id="active-list-container" class="" style="display: none;">
+                <% userLists.forEach( (list) => { %>
+                <div id="recipe-list-<%= list.id %>" class="recipe-list">
+                  <h2><%- list.list_name %></h2>
+                  <ul>
+
+                    <% if (list.recipes) { %>
+                    <% list.recipes.forEach( (recipe) => { %>
+                    <li id="<%= recipe.id %>-list-item">
+                      <div class="d-flex align-items-center">
+                        <a href="/cookbook/recipe/<%= recipe.id %>" class="list-name-group my-0 mx-0 py-2 px-2">
+                          <%- recipe.title %>
+                        </a>
+                        <div id="dropdownMenuButtonRecipe<%= recipe.id %>" class="mx-2 ml-auto dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                          <button class="btn border-none">
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                          </button>
+                          <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonRecipe<%= recipe.id %>">
+                            <a href="" class="dropdown-item" data-recipe-id="recipe.id" onclick="removeRecipeFromListClient('<%= recipe.id %>', '<%= list.id %>')">Remove From List</a>
+                          </div>
+
+                        </div>
+                      </div>
+
+                    </li>
+                    <% }) %>
+
+                    <% } else { %>
+                    <li>No recipes found. Go to a recipe's page to add it.</li>
+                    <% } %>
+                  </ul>
+                </div>
+                <% }) %>
+                <button onclick="showAllLists()" class="btn btn-primary">Show All Lists</button>
+              </div>
+
+
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+<%- include('../../partials/confirmationModal') %>
+
+<script defer>
+  document.addEventListener('DOMContentLoaded', () => {
+    addUserList();
+  });
+</script>

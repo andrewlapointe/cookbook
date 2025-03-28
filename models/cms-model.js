@@ -13,6 +13,11 @@ cmsModel.getRecipesByUser = async function (userId) {
     return result;
 };
 
+cmsModel.getRecipeIngredientsById = async function (id) {
+    const result = await api.get(`/recipe/${id}/ingredients`);
+    return result;
+};
+
 cmsModel.deleteRecipe = async function (data, auth) {
     const result = await api.delete(
         '/recipe/delete',
@@ -24,6 +29,11 @@ cmsModel.deleteRecipe = async function (data, auth) {
 
 cmsModel.editRecipe = async function (data, auth) {
     const result = await api.put('/recipe/edit', JSON.stringify(data), auth);
+    return result;
+};
+
+cmsModel.getAllUnits = async function () {
+    const result = await api.get('/units/all');
     return result;
 };
 

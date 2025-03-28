@@ -21,6 +21,19 @@ class API {
     /**
      *
      * @param {string} route
+     * @returns {json}
+     */
+    async getWAuth(route, auth) {
+        const apiResponse = await axios.get(
+            process.env.API_PATH_PREFIX + route,
+            { headers: { authorization: auth } }
+        );
+        return apiResponse;
+    }
+
+    /**
+     *
+     * @param {string} route
      * @param {json} body
      * @param {string} auth JWT token from login
      * @returns {json}

@@ -46,3 +46,11 @@
 {"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
 {"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
 {"errors":[{"location":"query","msg":"Invalid value","path":"q","type":"field","value":""}],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[{"location":"body","msg":"Request failed with status code 502","path":"username","type":"field","value":"andrewrlapointe"},{"location":"body","msg":"Request failed with status code 502","path":"email","type":"field","value":"andrewrlapointe@gmail.com"}],"level":"error","message":"Registration Error","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[{"location":"body","msg":"Invalid value","path":"listName","type":"field","value":""},{"location":"body","msg":"List name error.","path":"listName","type":"field","value":""}],"level":"error","message":"Submission Error","service":"user-service"}
+{"errors":[{"location":"body","msg":"Invalid value","path":"listName","type":"field","value":""},{"location":"body","msg":"List name error.","path":"listName","type":"field","value":""}],"level":"error","message":"Submission Error","service":"user-service"}

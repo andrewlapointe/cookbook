@@ -41,10 +41,8 @@
         </ul>
 
         <!-- Search Bar -->
-        <form class="d-flex" action="/cookbook/search" method="get">
-          <input class="form-control me-2" type="search" name="q" placeholder="Search recipes..." aria-label="Search">
-          <button class="btn btn-outline-light" type="submit">Search</button>
-        </form>
+        <%- include('../partials/search') %>
+
 
         <!-- User Profile / Auth Links -->
         <ul class="navbar-nav ms-3">
@@ -68,5 +66,3 @@
     </div>
   </nav>
 </header>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
