@@ -54,3 +54,5 @@
 {"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
 {"errors":[{"location":"body","msg":"Invalid value","path":"listName","type":"field","value":""},{"location":"body","msg":"List name error.","path":"listName","type":"field","value":""}],"level":"error","message":"Submission Error","service":"user-service"}
 {"errors":[{"location":"body","msg":"Invalid value","path":"listName","type":"field","value":""},{"location":"body","msg":"List name error.","path":"listName","type":"field","value":""}],"level":"error","message":"Submission Error","service":"user-service"}
+{"errors":[{"location":"body","msg":"Invalid value","path":"listName","type":"field","value":""},{"location":"body","msg":"List name error.","path":"listName","type":"field","value":""}],"level":"error","message":"Submission Error","service":"user-service"}
+{"errors":[{"location":"body","msg":"Invalid value","path":"listName","type":"field","value":""},{"location":"body","msg":"List name error.","path":"listName","type":"field","value":""}],"level":"error","message":"Submission Error","service":"user-service"}

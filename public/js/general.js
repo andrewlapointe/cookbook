@@ -305,3 +305,34 @@ buildSaveRecipeModal = () => {
 saveButtonOn = (userLists, recipeId) => {
     $('i#saveIcon').removeClass().addClass('fa-solid fa-bookmark mx-2');
 };
+
+showAddNewListRecipePage = () => {
+    $('div#add-list-container').show();
+    $('div#add-list-button-container').hide();
+};
+
+addUserListRecipePage = () => {
+    let $form = $('#add-list-container'),
+        term = $form.children('input#listName').val(),
+        url = $form.attr('action');
+
+    let posting = $.ajax({
+        url: url,
+        type: 'POST',
+        data: { listName: term },
+        dataType: 'json',
+        success: function (data, status) {
+            const clone = $('div.form-check:first').clone();
+
+            clone.children('label').html(term);
+            clone.children('input').val(data[0].id);
+            clone.children('input').attr('checked', false);
+
+            $('div.form-check:first').before(clone);
+
+            $('div#add-list-container').hide();
+            $('div#add-list-container').children('input').val('');
+            $('div#add-list-button-container').show();
+        },
+    });
+};
