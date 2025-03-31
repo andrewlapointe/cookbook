@@ -107,3 +107,7 @@ div#banner {
         }
     }
 }
+
+.hidden {
+    display: none !important;
+}

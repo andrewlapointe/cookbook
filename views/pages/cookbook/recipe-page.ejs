@@ -1,63 +1,71 @@
-<div class="container my-4">
-
-  <div class="recipe-container card mx-auto">
-    <div class="card-body d-relative">
-
-      <h1 class="text-center"><%= recipe.title %></h1>
-
-
-
-
-
-      <div class="mx-auto d-flex justify-content-center align-items-center">
-        <button id="print-btn" class="btn" onclick="window.print();return false;">Print<i class="fa-solid fa-print mx-2"></i></button>
-        <% if (userLists) { %>
-        <button id="saveRecipeButton" type="button" class="btn" data-bs-toggle="modal" data-bs-target="#saveRecipeModal" onclick="">Save<i id="saveIcon" class="fa-regular fa-bookmark mx-2"></i></button>
-        <% } %>
-        <button class="btn">Share<i class="fa-solid fa-share mx-2"></i></button>
-      </div>
-
-      <!-- Recipe Image -->
-      <div class="w-100 my-3">
-        <img id="recipe-page-img" src="<%= recipe.image_url %>" alt="Image of <%= recipe.title %>" class="recipe-img img-fluid d-block mx-auto" />
-      </div>
-
-      <!-- Recipe Info -->
-      <div class="recipe-details px-4 pb-1">
-        <p class="lead"><%= recipe.description %></p>
-        <div id="servings-time-container" class="d-flex justify-content-center align-items-center rounded">
-          <p class="my-auto p-2 px-3"><strong>Cooking Time:</strong> <%= recipe.cooking_time %> min</p>
-          <p class="my-auto p-2 px-3"><strong>Servings:</strong> <%= recipe.servings %></p>
-        </div>
-        <!-- Ingredients -->
-        <h3 class="mt-2">Ingredients</h3>
-        <hr width="100%" size="2">
-
-        <% ingredients.forEach( ingredient => { %>
-        <div class="ingredient-line row">
-          <div class="col">
-            <p style="white-space: pre-line"><%= ingredient.ingredient %></p>
-          </div>
-          <div class="col">
-            <p style="white-space: pre-line"><%= ingredient.quantity %> <%= ingredient.unit %></p>
-          </div>
+<div class="row row-cols-1 row-cols-md-2 justify-content-md-center g-1 mb-4">
+  <div class="container col-md-auto mx-2 my-4 d-flex flex-direction-column justify-content-center">
+    <div class="recipe-container card ">
+      <div class="card-body d-relative">
+        <h1 class="text-center"><%= recipe.title %></h1>
+        <div class="mx-auto d-flex justify-content-center align-items-center">
+          <button id="print-btn" class="btn" onclick="window.print();return false;">Print<i class="fa-solid fa-print mx-2"></i></button>
+          <% if (userLists) { %>
+          <button id="saveRecipeButton" type="button" class="btn" data-bs-toggle="modal" data-bs-target="#saveRecipeModal" onclick="">Save<i id="saveIcon" class="fa-regular fa-bookmark mx-2"></i></button>
+          <% } %>
+          <button class="btn">Share<i class="fa-solid fa-share mx-2"></i></button>
         </div>
 
-        <% }) %>
+        <!-- Recipe Image -->
+        <div class="w-100 my-3">
+          <img id="recipe-page-img" src="<%= recipe.image_url %>" alt="Image of <%= recipe.title %>" class="recipe-img img-fluid d-block mx-auto" />
+        </div>
 
-        <h3 class="mt-2">Instructions</h3>
-        <hr width="100%" size="2">
+        <!-- Recipe Info -->
+        <div class="recipe-details px-4 pb-1">
+          <p class="lead"><%= recipe.description %></p>
+          <div id="servings-time-container" class="d-flex justify-content-center align-items-center rounded">
+            <p class="my-auto p-2 px-3"><strong>Cooking Time:</strong> <%= recipe.cooking_time %> min</p>
+            <p class="my-auto p-2 px-3"><strong>Servings:</strong> <%= recipe.servings %></p>
+          </div>
+          <!-- Ingredients -->
+          <div class="d-flex justify-content-between mt-4">
+            <h3 class="mt-2">Ingredients</h3>
+            <div class="d-flex my-2 align-items-center">
+              <button class="btn btn-secondary btn-sm" onclick="showShoppingList()">Shopping List</button>
+            </div>
+          </div>
+          <hr width="100%" size="2">
 
-        <p style="white-space: pre-line"><%= recipe.instructions %></p>
+          <% ingredients.forEach( ingredient => { %>
+          <div class="ingredient-line row">
+            <div class="col">
+              <p style="white-space: pre-line"><%= ingredient.ingredient %></p>
+            </div>
+            <div class="col">
+              <p style="white-space: pre-line"><%= ingredient.quantity %> <%= ingredient.unit %></p>
+            </div>
+          </div>
 
-        <p class="text-center recipe-meta">
-          Created by <strong><%= recipe.author %></strong> on
-          <%= new Date(recipe.created_at).toLocaleDateString() %>
-        </p>
+          <% }) %>
+          <div class="mb-3">
+            <button class="btn btn-primary btn-sm" onclick="addAllShoppingListLS('<%= JSON.stringify(ingredients) %>')">Add all to shopping list</button>
+          </div>
+
+          <h3 class="mt-2">Instructions</h3>
+          <hr width="100%" size="2">
+
+          <p style="white-space: pre-line"><%= recipe.instructions %></p>
+
+          <p class="text-center recipe-meta">
+            Created by <strong><%= recipe.author %></strong> on
+            <%= new Date(recipe.created_at).toLocaleDateString() %>
+          </p>
+        </div>
       </div>
     </div>
   </div>
+  <div id="shopping-list-container" class="container col-md-auto mx-2 my-4 d-flex flex-direction-column justify-content-center">
+    <%- include('../../partials/shoppingList') %>
+  </div>
 </div>
+
+
 
 <% if (userLists) { %>
 <div class="modal fade" id="saveRecipeModal" tabindex="-1" aria-labelledby="saveRecipeModalLabel" aria-hidden="true">

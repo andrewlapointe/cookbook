@@ -336,3 +336,84 @@ addUserListRecipePage = () => {
         },
     });
 };
+
+// SHOPPING LIST
+showShoppingList = () => {
+    $('div#shopping-list-container').toggleClass('hidden');
+};
+
+getShoppingListLS = () => {
+    const list = JSON.parse(localStorage.getItem('shoppingList')) || [];
+    console.log(list);
+    return list;
+};
+
+addShoppingListItemLS = (ingredient, quantity) => {
+    const list = getShoppingListLS();
+    newIngredient = {};
+    newIngredient[ingredient] = quantity;
+    list.push(newIngredient);
+    localStorage.setItem('shoppingList', JSON.stringify(list));
+    buildShoppingList();
+};
+
+removeFromShoppingListLS = (ingredient) => {
+    let list = getShoppingListLS();
+
+    const index = list.findIndex((item) => item.hasOwnProperty(ingredient));
+
+    if (index !== -1) {
+        list.splice(index, 1);
+    }
+    localStorage.setItem('shoppingList', JSON.stringify(list));
+    buildShoppingList();
+};
+
+clearShoppingListLS = () => {
+    localStorage.clear('shoppingList');
+    buildShoppingList();
+};
+
+buildShoppingList = () => {
+    const list = getShoppingListLS();
+    const ul = $('ul#shopping-list-ul');
+    ul.children().remove();
+    if (list.length === 0) {
+        ul.html(
+            '<li class="list-group-item">Your shopping list is empty!</li>'
+        );
+    }
+    list.forEach((item) => {
+        console.log(item);
+        ul.append(
+            $('<li>', {
+                class: 'list-group-item d-flex justify-content-between align-items-center',
+            }).append(
+                $('<p>', {
+                    class: 'my-auto mx-2',
+                    html: Object.keys(item),
+                }).append(
+                    $('<span>').html(
+                        Object.values(item) === null ? '' : Object.values(item)
+                    )
+                ),
+                $('<button>', {
+                    class: 'btn btn-danger btn-sm hidden list-remove-btns',
+                    html: 'Remove',
+                }).click(() => {
+                    removeFromShoppingListLS(Object.keys(item));
+                })
+            )
+        );
+    });
+};
+
+addAllShoppingListLS = (ingredients) => {
+    parsedIngredients = JSON.parse(ingredients);
+    parsedIngredients.forEach((ingredient) => {
+        addShoppingListItemLS(
+            ingredient.ingredient,
+            `: ${ingredient.quantity} ${ingredient.unit}`
+        );
+    });
+};
