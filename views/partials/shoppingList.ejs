@@ -1,5 +1,5 @@
 <div class="recipe-container card ">
-  <div class="card-body d-relative">
+  <div class="card-body">
     <h2 class="text-center mb-4">Shopping List</h2>
     <div class="row px-2">
       <div class="col-md-10 w-100 mx-auto">
@@ -7,7 +7,7 @@
         <div class="d-flex justify-content-center mb-2">
           <button class="btn btn-sm btn-primary mx-2" onclick="$('#add-item-form').toggleClass('hidden')">Add</button>
           <button class="btn btn-sm btn-warning mx-2" onclick="$('button.list-remove-btns').toggleClass('hidden')">Edit</button>
-          <button class="btn btn-sm btn-danger mx-2" onclick="clearShoppingListLS()">Clear</button>
+          <button class="btn btn-sm btn-danger mx-2" onclick="showConfirmModal('Are you sure you want to clear your shopping list? This cannot be undone.', () => clearShoppingListLS())">Clear</button>
         </div>
 
         <form action="/shopping-list/add" method="POST" id="add-item-form" class="hidden">
@@ -25,6 +25,9 @@
     </div>
   </div>
 </div>
+
+<%- include('./confirmationModal') %>
+
 
 <script defer>
   document.addEventListener('DOMContentLoaded', () => {

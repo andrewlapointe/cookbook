@@ -338,8 +338,21 @@ addUserListRecipePage = () => {
 };
 
 // SHOPPING LIST
-showShoppingList = () => {
+showShoppingList = (button) => {
     $('div#shopping-list-container').toggleClass('hidden');
+    if ($('#add-all-btn-recipe-page').hasClass('hidden')) {
+        $('#toggle-add-state-btn').toggleClass('hidden');
+    } else {
+        $('input.ingredient-checkbox').toggleClass('hidden');
+        $('#add-all-btn-recipe-page').toggleClass('hidden');
+        $('#add-select-btn-recipe-page').toggleClass('hidden');
+    }
+    let stateText = $(button).children('span:first');
+    if (stateText.text() === 'Show') {
+        stateText.text('Hide');
+    } else {
+        stateText.text('Show');
+    }
 };
 
 getShoppingListLS = () => {
@@ -351,7 +364,7 @@ getShoppingListLS = () => {
 addShoppingListItemLS = (ingredient, quantity) => {
     const list = getShoppingListLS();
     newIngredient = {};
-    newIngredient[ingredient] = quantity;
+    newIngredient[ingredient] = quantity ? `: ${quantity}` : null;
     list.push(newIngredient);
     localStorage.setItem('shoppingList', JSON.stringify(list));
     buildShoppingList();
@@ -413,7 +426,7 @@ addAllShoppingListLS = (ingredients) => {
     parsedIngredients.forEach((ingredient) => {
         addShoppingListItemLS(
             ingredient.ingredient,
-            `: ${ingredient.quantity} ${ingredient.unit}`
+            `${ingredient.quantity} ${ingredient.unit}`
         );
     });
 };

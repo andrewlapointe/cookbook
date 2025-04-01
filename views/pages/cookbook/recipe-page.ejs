@@ -1,4 +1,4 @@
-<div class="row row-cols-1 row-cols-md-2 justify-content-md-center g-1 mb-4">
+<div class="row p-relative row-cols-1 row-cols-md-2 justify-content-md-center g-1 mb-4">
   <div class="container col-md-auto mx-2 my-4 d-flex flex-direction-column justify-content-center">
     <div class="recipe-container card ">
       <div class="card-body d-relative">
@@ -27,25 +27,32 @@
           <div class="d-flex justify-content-between mt-4">
             <h3 class="mt-2">Ingredients</h3>
             <div class="d-flex my-2 align-items-center">
-              <button class="btn btn-secondary btn-sm" onclick="showShoppingList()">Shopping List</button>
+              <button class="btn btn-secondary btn-sm" onclick="showShoppingList(this)"><span>Show</span> Shopping List</button>
             </div>
           </div>
           <hr width="100%" size="2">
 
-          <% ingredients.forEach( ingredient => { %>
-          <div class="ingredient-line row">
-            <div class="col">
-              <p style="white-space: pre-line"><%= ingredient.ingredient %></p>
+          <form id="ingredient-form" action="">
+            <% ingredients.forEach( ingredient => { %>
+            <div class="ingredient-line row">
+              <div class="col ingredient-name">
+                <div class="w-100">
+                  <input class="ingredient-checkbox hidden" type="checkbox">
+                  <label style="white-space: pre-line"><%= ingredient.ingredient %></label>
+                </div>
+              </div>
+              <div class="col ingredient-quantity">
+                <p id="unit" style="white-space: pre-line"><%= ingredient.quantity %> <%= ingredient.unit %></p>
+              </div>
             </div>
-            <div class="col">
-              <p style="white-space: pre-line"><%= ingredient.quantity %> <%= ingredient.unit %></p>
-            </div>
-          </div>
 
-          <% }) %>
-          <div class="mb-3">
-            <button class="btn btn-primary btn-sm" onclick="addAllShoppingListLS('<%= JSON.stringify(ingredients) %>')">Add all to shopping list</button>
-          </div>
+            <% }) %>
+            <div class="mb-3">
+              <button id="add-all-btn-recipe-page" class="btn btn-primary btn-sm hidden">Add All</button>
+              <button id="add-select-btn-recipe-page" class="btn btn-primary btn-sm hidden">Add Selected</button>
+              <button id="toggle-add-state-btn" class="btn btn-primary btn-sm hidden">Add ingredients to shopping list</button>
+            </div>
+          </form>
 
           <h3 class="mt-2">Instructions</h3>
           <hr width="100%" size="2">
@@ -60,7 +67,7 @@
       </div>
     </div>
   </div>
-  <div id="shopping-list-container" class="container col-md-auto mx-2 my-4 d-flex flex-direction-column justify-content-center">
+  <div id="shopping-list-container" class="hidden container col-md-auto mx-2 my-4 d-flex flex-direction-column justify-content-centers">
     <%- include('../../partials/shoppingList') %>
   </div>
 </div>
@@ -117,7 +124,35 @@
 
 <script defer>
   document.addEventListener('DOMContentLoaded', () => {
-    buildSaveRecipeModal()
+    buildSaveRecipeModal();
+    $('#add-select-btn-recipe-page').on('click', function(event) {
+      event.preventDefault();
+      $('#ingredient-form').children('div.row').each(function(index, element) {
+        let $element = $(element)
+        let input = $element.children('div.ingredient-name').children('div').find('input')
+        let label = $element.children('div.ingredient-name').children('div').find('label')
+        let quant = $element.children('div.ingredient-quantity').find('p#unit')
+        if (input.prop('checked')) {
+          addShoppingListItemLS(label.text(), quant.text())
+        }
+      })
+      toggleAddIngredientState()
+    })
+    $('#add-all-btn-recipe-page').on('click', function(event) {
+      event.preventDefault();
+      addAllShoppingListLS('<%- JSON.stringify(ingredients) %>')
+      toggleAddIngredientState()
+    })
+    $('#toggle-add-state-btn').on('click', function(event) {
+      event.preventDefault();
+      toggleAddIngredientState()
+    })
+    toggleAddIngredientState = () => {
+      $('input.ingredient-checkbox').toggleClass('hidden')
+      $('#toggle-add-state-btn').toggleClass('hidden');
+      $('#add-all-btn-recipe-page').toggleClass('hidden');
+      $('#add-select-btn-recipe-page').toggleClass('hidden');
+    }
   });
 </script>
 
