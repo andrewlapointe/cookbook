@@ -24,6 +24,8 @@
         "jquery": "^3.7.1",
         "jsonwebtoken": "^9.0.2",
         "nodemailer": "^6.10.0",
+        "object-assign": "^4.1.1",
+        "parse-fraction": "^1.2.1",
         "pg": "^8.13.1",
         "session": "^0.1.0",
         "winston": "^3.17.0"

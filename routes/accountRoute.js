@@ -52,6 +52,8 @@ accountRouter.get(
 accountRouter.delete(
     '/list/delete/:id',
     utilities.checkLogin,
+    accountController.deleteRules(),
+    accountController.checkRulesGeneric,
     utilities.handleErrors(accountController.deleteList)
 );
 

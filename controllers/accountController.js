@@ -1,4 +1,4 @@
-const { body, validationResult } = require('express-validator');
+const { body, param, validationResult } = require('express-validator');
 const utils = require('../utilities/');
 const accountModel = require('../models/account-model');
 const API = require('../models/api');
@@ -94,9 +94,6 @@ accountController.registrationRules = () => {
     ];
 };
 
-/* ******************************
- * Check data and return errors or continue to registration
- * ***************************** */
 accountController.checkRegData = async (req, res, next) => {
     const { username, email } = req.body;
     let errors = [];
@@ -131,7 +128,7 @@ accountController.submitRegistration = async function (req, res) {
         return;
     }
 
-    accountModel.registerNewAccount(email, username, password_hash); // Add success message
+    accountModel.registerNewAccount(email, username, password_hash);
     req.flash('notice', 'Account successfully registered! Please log in.');
     res.status(201).redirect('/account/login');
 };
@@ -266,7 +263,7 @@ accountController.listNameRules = () => {
             .escape()
             .notEmpty()
             .isLength({ min: 1 })
-            .withMessage('List name error.'), // on error this message is sent.
+            .withMessage('List name error.'),
     ];
 };
 
@@ -281,6 +278,27 @@ accountController.checkListNameRules = async (req, res, next) => {
         return;
     }
     next();
+};
+
+accountController.checkRulesGeneric = async (req, res, next) => {
+    let errors = [];
+    errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        req.flash('notice', errors.array()[0].msg);
+        utils.logger.log('error', 'Validation Error', errors);
+        return;
+    }
+    next();
+};
+
+accountController.deleteRules = () => {
+    return [
+        param('id')
+            .trim()
+            .notEmpty()
+            .isInt()
+            .withMessage('Deletion param error.'),
+    ];
 };
 
 accountController.addList = async function (req, res) {
