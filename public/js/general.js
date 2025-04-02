@@ -182,6 +182,7 @@ removeRecipeFromListClient = (recipe_id, list_id) => {
 };
 
 showActiveList = (listId) => {
+    $('h2#all-lists-header').css('display', 'none');
     $('ul#user-lists-ul').parent().css('display', 'none');
     $('div#active-list-container').css('display', 'block');
     $('div.recipe-list').each(function () {
@@ -191,6 +192,7 @@ showActiveList = (listId) => {
 };
 
 showAllLists = () => {
+    $('h2#all-lists-header').css('display', 'block');
     $('div#active-list-container').css('display', 'none');
     $('ul#active-list').empty();
     $('ul#user-lists-ul').parent().css('display', 'block');

@@ -15,6 +15,8 @@ accountRouter.get(
 
 accountRouter.post(
     '/login',
+    accountController.loginRules(),
+    accountController.checkLoginData,
     utilities.handleErrors(accountController.accountLogin)
 );
 

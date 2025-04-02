@@ -33,7 +33,10 @@ accountController.buildProfile = async function (req, res) {
 };
 
 accountController.buildLogin = async function (req, res) {
-    res.render('pages/account/login', { title: 'Login' });
+    res.render('pages/account/login', {
+        title: 'Login',
+        goto: req.query.redirect || '/',
+    });
 };
 
 accountController.registrationRules = () => {
@@ -44,13 +47,13 @@ accountController.registrationRules = () => {
             .escape()
             .notEmpty()
             .isLength({ min: 2 })
-            .withMessage('Please provide a first name.') // on error this message is sent.
+            .withMessage('Please provide a valid username.') // on error this message is sent.
             .custom(async (username) => {
                 const usernameCheck =
                     await accountModel.checkAccountExitsUsername(username);
                 if (usernameCheck) {
                     throw new Error(
-                        'Username exists. Please log in or use different email'
+                        'Username exists. Please log in or use different username'
                     );
                 }
             }),
@@ -58,9 +61,11 @@ accountController.registrationRules = () => {
         // valid email is required and cannot already exist in the database
         body('email')
             .trim()
+            .notEmpty()
+            .blacklist('\\\'"><&|=')
             .isEmail()
-            .normalizeEmail() // refer to validator.js docs
             .withMessage('A valid email is required.')
+            .normalizeEmail() // refer to validator.js docs
             .custom(async (email) => {
                 const emailCheck = await accountModel.checkAccountExitsEmail(
                     email
@@ -76,13 +81,16 @@ accountController.registrationRules = () => {
         body('password')
             .trim()
             .notEmpty()
-            // .isStrongPassword({
-            //     // minLength: 12,
-            //     // minLowercase: 1,
-            //     minUppercase: 1,
-            //     minNumbers: 1,
-            // })
-            .withMessage('Password does not meet requirements.'),
+            .isStrongPassword({
+                minLength: 8,
+                minLowercase: 1,
+                minUppercase: 0,
+                minNumbers: 0,
+                minSymbols: 0,
+            })
+            .withMessage(
+                'Password does not meet requirements. You must have at least 8 characters'
+            ),
     ];
 };
 
@@ -124,7 +132,52 @@ accountController.submitRegistration = async function (req, res) {
     }
 
     accountModel.registerNewAccount(email, username, password_hash); // Add success message
+    req.flash('notice', 'Account successfully registered! Please log in.');
     res.status(201).redirect('/account/login');
+};
+
+accountController.loginRules = () => {
+    return [
+        // valid email is required and cannot already exist in the database
+
+        body('email')
+            .trim()
+            .notEmpty()
+            .blacklist('\\\'"><&|=')
+            .withMessage('A valid email is required.')
+            .normalizeEmail() // refer to validator.js docs
+            .custom(async (email) => {
+                const emailCheck = await accountModel.checkAccountExitsEmail(
+                    email
+                );
+                if (!emailCheck) {
+                    throw new Error(
+                        'Account does not exist. Please use different email or register an account'
+                    );
+                }
+            }),
+
+        // password is required and must be strong password
+        body('password').trim().notEmpty().withMessage('Must use password'),
+    ];
+};
+
+accountController.checkLoginData = async (req, res, next) => {
+    const { email, redirect } = req.body;
+    let errors = [];
+    errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        req.flash('notice', errors.array()[0].msg);
+        utils.logger.log('error', 'Login Error', errors);
+        res.render('./pages/account/login', {
+            title: 'Login',
+            errors: null,
+            email,
+            goto: redirect,
+        });
+        return;
+    }
+    next();
 };
 
 /* ****************************************
@@ -132,16 +185,19 @@ accountController.submitRegistration = async function (req, res) {
  * ************************************ */
 accountController.accountLogin = async function (req, res) {
     // let nav = await utilities.getNav();
-    const { email, password } = req.body;
+    const { email, password, redirect } = req.body;
     const accountData = await accountModel.getAccountByEmail(email);
-    if (!accountData) {
+
+    if (accountData.data.length === 0) {
+        console.log('in if');
         req.flash('notice', 'Please check your credentials and try again.');
-        res.status(400).redirect('./pages/account/login', {
+        res.status(400).render('./pages/account/login', {
             title: 'Login',
-            // nav,
             errors: null,
             email,
+            goto: redirect,
         });
+        console.log('before return');
         return;
     }
 
@@ -174,7 +230,7 @@ accountController.accountLogin = async function (req, res) {
                     });
                 }
                 req.flash('notice', 'Login Successful');
-                return res.redirect('/');
+                return res.redirect(redirect);
             } else {
                 req.flash(
                     'notice',
@@ -184,6 +240,7 @@ accountController.accountLogin = async function (req, res) {
                     title: 'Login',
                     errors: null,
                     email,
+                    goto: redirect,
                 });
                 return;
             }

@@ -9,6 +9,7 @@
       <label for="loginPassword" class="form-label">Password</label>
       <input type="password" class="form-control" id="loginPassword" name="password" required />
     </div>
+    <input type="text" name="redirect" id="redirect" value="<%= goto %>" hidden readonly>
     <button type="submit" class="btn btn-primary w-100">Login</button>
     <p>Don't have an account? Register <a href="/account/register">here</a>.</p>
   </form>

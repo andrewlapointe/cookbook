@@ -63,7 +63,9 @@ Util.checkLogin = (req, res, next) => {
         next();
     } else {
         req.flash('notice', 'Please log in.');
-        return res.redirect('/account/login');
+        return res.redirect(
+            `/account/login?redirect=${encodeURIComponent(req.originalUrl)}`
+        );
     }
 };
 

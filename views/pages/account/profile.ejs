@@ -21,14 +21,11 @@
       <div class="col">
         <div class="card shadow-sm">
           <div class="profile-header mt-2">
-            <h1 id="list-header">My Lists</h1>
+            <h1 id="list-header">Saved Recipes</h1>
           </div>
-
-
-
           <div class="card-body">
             <div class="profile-section">
-
+              <h2 id="all-lists-header">Folders</h2>
               <div>
                 <ul id="user-lists-ul">
                   <% userLists.forEach( (list) => { %>
@@ -105,14 +102,14 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
+      <div id="profile-shopping-list" class="col">
+        <%- include('../../partials/shoppingList') %>
+      </div>
 
-<%- include('../../partials/confirmationModal') %>
+      <%- include('../../partials/confirmationModal') %>
 
-<script defer>
-  document.addEventListener('DOMContentLoaded', () => {
-    addUserList();
-  });
-</script>
+      <script defer>
+        document.addEventListener('DOMContentLoaded', () => {
+          addUserList();
+        });
+      </script>
