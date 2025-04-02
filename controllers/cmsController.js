@@ -1,7 +1,10 @@
+const { body, validationResult } = require('express-validator');
+const parseFraction = require('parse-fraction');
 const cmsModel = require('../models/cms-model');
 const cmsController = {};
 
 cmsController.buildHub = async function (req, res) {
+    console.log(parseFraction('1 1/3'));
     const userRecipes = await cmsModel.getRecipesByUser(
         res.locals.accountData.id
     );
@@ -25,7 +28,35 @@ cmsController.buildHub = async function (req, res) {
     });
 };
 
+cmsController.createRecipeRules = () => {
+    return [
+        body('recipeName', 'Recipe name error').notEmpty().escape(),
+        body('author', 'Recipe author error').notEmpty().escape(),
+        body('author').notEmpty().escape().withMessage('Recipe author error'),
+        body('description', 'Recipe description error')
+            .escape()
+            .isLength({ max: 1000 })
+            .withMessage('Description is too long.')
+            .default(''),
+        body('ingredient', 'Recipe ingredient error').notEmpty().escape(),
+        body('ingredientAmount').notEmpty(),
+    ];
+};
+
+cmsController.checkRecipeData = async (req, res, next) => {
+    let errors = [];
+    errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        req.flash('notice', errors.array()[0].msg);
+        utils.logger.log('error', 'CMS Error', errors);
+        res.status(500).redirect('/cms/hub');
+        return;
+    }
+    next();
+};
+
 cmsController.createRecipe = async function (req, res) {
+    console.log(req.body);
     await cmsModel.createNewRecipe(req.body, req.cookies['jwt']);
     res.status(201).redirect('/cms/hub');
 };

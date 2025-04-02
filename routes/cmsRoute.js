@@ -14,6 +14,8 @@ cmsRouter.get(
 cmsRouter.post(
     '/recipe/new',
     utilities.checkLogin,
+    cmsController.createRecipeRules(),
+    cmsController.checkRecipeData,
     utilities.handleErrors(cmsController.createRecipe)
 );
 
