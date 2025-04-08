@@ -1,6 +1,8 @@
 const { body, validationResult } = require('express-validator');
 const parseFraction = require('parse-fraction');
+const utils = require('../utilities/');
 const cmsModel = require('../models/cms-model');
+const accountModel = require('../models/account-model');
 const cmsController = {};
 
 cmsController.buildHub = async function (req, res) {
@@ -9,11 +11,34 @@ cmsController.buildHub = async function (req, res) {
         res.locals.accountData.id
     );
 
+    const userLists = await accountModel.getUserLists(
+        res.locals.accountData.id,
+        req.cookies['jwt']
+    );
+
+    userLists.data.rows.forEach((list) => {
+        if (list.recipes[0].id === null) {
+            delete list.recipes;
+        }
+    });
+
     const recipeData = userRecipes.data.rows;
     for (let i = 0; i < recipeData.length; i++) {
         const id = recipeData[i].id;
         const ingedients = await cmsModel.getRecipeIngredientsById(id);
         recipeData[i].ingredients = ingedients.data.rows;
+        let parentLists = [];
+        userLists.data.rows.forEach((list) => {
+            if (
+                list.recipes &&
+                Object.values(Object.values(list.recipes)[0]).includes(
+                    parseInt(id)
+                )
+            ) {
+                parentLists.push(list.list_name);
+            }
+        });
+        recipeData[i].lists = parentLists;
     }
     // const ingredients = await cmsModel.getAllIngredients();
     const units = await cmsModel.getAllUnits();
@@ -25,6 +50,7 @@ cmsController.buildHub = async function (req, res) {
         userRecipes: recipeData,
         // allIngredients: ingredients.data.rows,
         units: units.data.rows,
+        userLists: userLists.data.rows,
     });
 };
 

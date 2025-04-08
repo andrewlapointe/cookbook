@@ -66,3 +66,11 @@
 {"errors":[{"location":"body","msg":"Username exists. Please log in or use different username","path":"username","type":"field","value":"johnDoe"},{"location":"body","msg":"Email exists. Please log in or use different email","path":"email","type":"field","value":"manager@340.edu"}],"level":"error","message":"Registration Error","service":"user-service"}
 {"errors":[{"location":"body","msg":"Email exists. Please log in or use different email","path":"email","type":"field","value":"manager@340.edu"}],"level":"error","message":"Registration Error","service":"user-service"}
 {"errors":[{"location":"body","msg":"A valid email is required.","path":"email","type":"field","value":"TEST@TEST"}],"level":"error","message":"Registration Error","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[{"location":"body","msg":"Account does not exist. Please use different email or register an account","path":"email","type":"field","value":"sidneylloyd01@gmail.com"}],"level":"error","message":"Login Error","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
+{"errors":[{"location":"body","msg":"Invalid value","path":"ingredientAmount","type":"field","value":""}],"level":"error","message":"CMS Error","service":"user-service"}
