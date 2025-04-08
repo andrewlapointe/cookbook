@@ -1,9 +1,10 @@
 <div class="container my-3">
-  <h1><%= username %>'s Cookbook</h1>
-  <!-- <p class="lead">Welcome <strong><%= username %></strong></p> -->
-  <div class="cms-buttons d-grid gap-2 d-sm-flex justify-content-center mt-4">
-    <button class="btn btn-primary  " onclick="toggleActiveElement('my-recipes-container', ['add-container'])">My Recipes</button>
-    <button class="btn btn-primary  " onclick="toggleActiveElement('add-container', ['my-recipes-container'])">Add Recipe</button>
+  <div class="cms-buttons container d-grid gap-2 d-sm-flex justify-content-between align-items-center mt-4">
+    <h1><%= username %>'s Cookbook</h1>
+    <div>
+      <button class="btn btn-primary  " onclick="toggleActiveElement('my-recipes-container', ['add-container'])">My Recipes</button>
+      <button class="btn btn-primary  " onclick="toggleActiveElement('add-container', ['my-recipes-container'])">Add Recipe</button>
+    </div>
     <!-- <button class="btn btn-warning" onclick="toggleActiveElement('edit-container', ['add-container', 'delete-container'])">Edit Recipe</button>
     <button class="btn btn-danger" onclick="toggleActiveElement('delete-container', ['add-container', 'edit-container'])">Delete Recipe</button> -->
   </div>
