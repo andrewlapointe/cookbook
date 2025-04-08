@@ -432,3 +432,29 @@ addAllShoppingListLS = (ingredients) => {
         );
     });
 };
+
+filterCookbook = (liObj) => {
+    let $li = $(liObj);
+    listName = $li.attr('data-list-name');
+    $('button#clear-filter-btn').removeClass('hidden');
+
+    $.each($('li.list-group-item'), (id, value) => {
+        let $recipe = $(value);
+        let parentLists;
+        let parentListsRaw = $recipe.attr('data-parent-lists');
+
+        if (parentListsRaw && parentListsRaw.split(',').includes(listName)) {
+            console.log('found one');
+            $recipe.removeClass('hidden');
+        } else {
+            $recipe.addClass('hidden');
+        }
+    });
+};
+
+clearFilters = () => {
+    $('button#clear-filter-btn').addClass('hidden');
+    $.each($('li.list-group-item'), (id, value) => {
+        $(value).removeClass('hidden');
+    });
+};

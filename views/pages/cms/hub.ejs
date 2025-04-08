@@ -12,13 +12,27 @@
 <div class="container mt-4 mb-5">
   <div id="my-recipes-container" class="container">
     <div class="card shadow p-4">
-      <h2 id="edit-h2" class="mb-4">My Recipes</h2>
+      <div class="d-flex flex-row justify-content-between">
+        <h2 id="edit-h2" class="mb-4">My Recipes</h2>
+        <div class="justify-content-center align-items-center my-auto mx-3 dropdown">
+          <button id="clear-filter-btn" class="btn btn-secondary btn-sm hidden" onclick="clearFilters()">Clear Filters</button>
+          <button class="btn" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa-solid fa-filter"></i>
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+            <% userLists.forEach( list => { %>
+            <li><a class="dropdown-item btn" data-list-name="<%- list.list_name %>" onclick="filterCookbook(this)"><%- list.list_name %></a></li>
+            <% }) %>
+          </ul>
+
+        </div>
+      </div>
       <ul id="edit-list" class="list-group list-group-flush">
         <% if (userRecipes.length === 0) { %>
         <li class="list-group-item text-muted text-center">No recipes found.</li>
         <% } else { %>
         <% userRecipes.forEach(recipe => { %>
-        <li id="recipe-<%= recipe.id %>" class="list-group-item d-flex justify-content-between align-items-center">
+        <li id="recipe-<%= recipe.id %>" data-parent-lists="<%- recipe.lists %>" class="list-group-item d-flex justify-content-between align-items-center">
           <span><a href="/cookbook/recipe/<%= recipe.id %>"><%= recipe.title %></a></span>
           <div style="display: inline;">
             <button class="btn btn-warning btn-sm mx-2" data-recipe='<%- JSON.stringify(recipe) %>' data-units="<%- JSON.stringify(units) %>" onclick="fillEditForm(this)">
@@ -161,16 +175,13 @@
             <!-- <h3 class="border-bottom border-dark pb-1 mb-2">Ingredients</h3> -->
             <div id="ingredient-row" class="row">
               <div class="col">
-                <label for="ingredient" class="form-label">Ingredient Name...</label>
-                <input class="form-control" name="ingredient" type="text" list="ingredient-list" placeholder="Ingredient Name" required rows="3">
-                <datalist id="ingredient-list">
-                  <% for (let i = 0; i < 500; i++) { %>
-                  <option value="<%= i %>"></option>
-                  <% } %>
-                </datalist>
+                <label for="ingredient" class="form-label">Ingredient</label>
+                <input class="form-control" name="ingredient" type="text" placeholder="Ingredient Name" required rows="3">
+                <!-- <datalist id="ingredient-list">
+                </datalist> -->
               </div>
               <div class="col-3">
-                <label for="ingredientAmount" class="form-label">Amount...</label>
+                <label for="ingredientAmount" class="form-label">Amount</label>
                 <input class="form-control" type="text" name="ingredientAmount" id="ingredientAmount" placeholder="Ingredient Amount">
               </div>
               <div class="col-2">
