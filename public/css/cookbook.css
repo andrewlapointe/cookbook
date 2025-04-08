@@ -24,6 +24,9 @@ button.active-custom {
 }
 
 img#recipe-page-img {
+    /* width: 80%;
+    height: 100%;
+    object-fit: cover; */
     max-height: 400px;
     display: block;
     margin: 0 auto;
