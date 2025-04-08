@@ -6,6 +6,10 @@ const accountModel = require('../models/account-model');
 const cmsController = {};
 
 cmsController.buildHub = async function (req, res) {
+    let addForm = false;
+    if (req.query.state === 'addform') {
+        addForm = true;
+    }
     console.log(parseFraction('1 1/3'));
     const userRecipes = await cmsModel.getRecipesByUser(
         res.locals.accountData.id
@@ -51,6 +55,7 @@ cmsController.buildHub = async function (req, res) {
         // allIngredients: ingredients.data.rows,
         units: units.data.rows,
         userLists: userLists.data.rows,
+        addFormState: addForm,
     });
 };
 
@@ -61,6 +66,7 @@ cmsController.createRecipeRules = () => {
         body('author').notEmpty().escape().withMessage('Recipe author error'),
         body('description', 'Recipe description error')
             .escape()
+            .notEmpty()
             .isLength({ max: 1000 })
             .withMessage('Description is too long.')
             .default(''),
@@ -72,18 +78,24 @@ cmsController.createRecipeRules = () => {
 cmsController.checkRecipeData = async (req, res, next) => {
     let errors = [];
     errors = validationResult(req);
+    console.log(errors);
     if (!errors.isEmpty()) {
         req.flash('notice', errors.array()[0].msg);
         utils.logger.log('error', 'CMS Error', errors);
-        res.status(500).redirect('/cms/hub');
+        res.status(500).redirect('/cms/hub?state=addform');
         return;
     }
     next();
 };
 
 cmsController.createRecipe = async function (req, res) {
-    console.log(req.body);
-    await cmsModel.createNewRecipe(req.body, req.cookies['jwt']);
+    const response = await cmsModel.createNewRecipe(
+        req.body,
+        req.cookies['jwt']
+    );
+    if (response) {
+        req.flash('notice', 'Recipe Added');
+    }
     res.status(201).redirect('/cms/hub');
 };
 

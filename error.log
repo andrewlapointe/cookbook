@@ -74,3 +74,6 @@
 {"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
 {"errors":[],"level":"error","message":"Error in Search Query","service":"user-service"}
 {"errors":[{"location":"body","msg":"Invalid value","path":"ingredientAmount","type":"field","value":""}],"level":"error","message":"CMS Error","service":"user-service"}
+{"errors":[{"location":"body","msg":"Recipe author error","path":"author","type":"field","value":""},{"location":"body","msg":"Recipe author error","path":"author","type":"field","value":""}],"level":"error","message":"CMS Error","service":"user-service"}
+{"errors":[{"location":"body","msg":"Recipe author error","path":"author","type":"field","value":""},{"location":"body","msg":"Recipe author error","path":"author","type":"field","value":""}],"level":"error","message":"CMS Error","service":"user-service"}
+{"errors":[{"location":"body","msg":"Recipe author error","path":"author","type":"field","value":""},{"location":"body","msg":"Recipe author error","path":"author","type":"field","value":""}],"level":"error","message":"CMS Error","service":"user-service"}

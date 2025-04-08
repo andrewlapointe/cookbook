@@ -20,7 +20,7 @@
 
         <!-- Recipe Info -->
         <div class="recipe-details px-4 pb-1">
-          <p class="lead"><%= recipe.description %></p>
+          <p class="lead"><%- recipe.description %></p>
           <div id="servings-time-container" class="d-flex justify-content-center align-items-center rounded">
             <p class="my-auto p-2 px-3"><strong>Cooking Time:</strong> <%= recipe.cooking_time %> min</p>
             <p class="my-auto p-2 px-3"><strong>Servings:</strong> <%= recipe.servings %></p>
@@ -40,7 +40,7 @@
               <div class="col ingredient-name">
                 <div class="w-100">
                   <input class="ingredient-checkbox hidden" type="checkbox">
-                  <label style="white-space: pre-line"><%= ingredient.ingredient %></label>
+                  <label style="white-space: pre-line"><%- ingredient.ingredient %></label>
                 </div>
               </div>
               <div class="col ingredient-quantity">
@@ -66,7 +66,7 @@
       </div>
       <div class="card-footer">
         <p class="text-center recipe-meta">
-          Created by <strong><%= recipe.author %></strong> on
+          Created by <strong><%- recipe.author %></strong> on
           <%= new Date(recipe.created_at).toLocaleDateString() %>
         </p>
       </div>
