@@ -1,15 +1,139 @@
-<div class="container">
-  <h1>CMS Hub</h1>
-  <p class="lead">Welcome <strong><%= username %></strong></p>
-  <div class="cms-buttons d-grid gap-2 d-sm-flex justify-content-center">
-    <button class="btn btn-primary  " onclick="toggleActiveElement('add-container', ['edit-container', 'delete-container'])">Add Recipe</button>
-    <button class="btn btn-warning" onclick="toggleActiveElement('edit-container', ['add-container', 'delete-container'])">Edit Recipe</button>
-    <button class="btn btn-danger" onclick="toggleActiveElement('delete-container', ['add-container', 'edit-container'])">Delete Recipe</button>
+<div class="container my-3">
+  <h1><%= username %>'s Cookbook</h1>
+  <!-- <p class="lead">Welcome <strong><%= username %></strong></p> -->
+  <div class="cms-buttons d-grid gap-2 d-sm-flex justify-content-center mt-4">
+    <button class="btn btn-primary  " onclick="toggleActiveElement('my-recipes-container', ['add-container'])">My Recipes</button>
+    <button class="btn btn-primary  " onclick="toggleActiveElement('add-container', ['my-recipes-container'])">Add Recipe</button>
+    <!-- <button class="btn btn-warning" onclick="toggleActiveElement('edit-container', ['add-container', 'delete-container'])">Edit Recipe</button>
+    <button class="btn btn-danger" onclick="toggleActiveElement('delete-container', ['add-container', 'edit-container'])">Delete Recipe</button> -->
   </div>
 </div>
 
-<div class="container mt-5 mb-5">
-  <div id="add-container" class="container">
+<div class="container mt-4 mb-5">
+  <div id="my-recipes-container" class="container">
+    <div class="card shadow p-4">
+      <h2 id="edit-h2" class="mb-4">My Recipes</h2>
+      <ul id="edit-list" class="list-group list-group-flush">
+        <% if (userRecipes.length === 0) { %>
+        <li class="list-group-item text-muted text-center">No recipes found.</li>
+        <% } else { %>
+        <% userRecipes.forEach(recipe => { %>
+        <li id="recipe-<%= recipe.id %>" class="list-group-item d-flex justify-content-between align-items-center">
+          <span><a href="/cookbook/recipe/<%= recipe.id %>"><%= recipe.title %></a></span>
+          <div style="display: inline;">
+            <button class="btn btn-warning btn-sm mx-2" data-recipe='<%- JSON.stringify(recipe) %>' data-units="<%- JSON.stringify(units) %>" onclick="fillEditForm(this)">
+              Edit
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="showConfirmModal('Are you sure you want to delete the <%= recipe.title %> recipe? This cannot be undone.', 
+              function() {
+                fetch('/cms/recipe/delete/<%= recipe.id %>', { method: 'DELETE' });
+                $(`li#recipe-${'<%= recipe.id %>'}`).remove();
+                          })">
+              Delete
+            </button>
+          </div>
+        </li>
+
+        <% }) %>
+        <% } %>
+      </ul>
+      <form id="edit-form" action="/cms/recipe/edit" method="post" style="display: none;">
+        <!-- Recipe Name -->
+        <div class="mb-3">
+          <label for="recipeName" class="form-label">Recipe Name</label>
+          <input type="text" class="form-control" id="editRecipeName" name="recipeName" required />
+        </div>
+
+        <!-- Recipe Author -->
+        <div class="mb-3">
+          <label for="author" class="form-label">Author</label>
+          <input type="text" class="form-control" id="editAuthor" name="author" placeholder="Enter Author name" />
+        </div>
+
+        <!-- Description -->
+        <div class="mb-3">
+          <label for="description" class="form-label">Short Description</label>
+          <textarea class="form-control" id="editDescription" name="description" rows="2" placeholder="Brief description of the recipe"></textarea>
+        </div>
+
+        <!-- Ingredients -->
+        <div class="mb-3">
+          <div id="edit-ingredient-container">
+            <!-- <h3 class="border-bottom border-dark pb-1 mb-2">Ingredients</h3> -->
+            <div id="edit-ingredient-row" class="row">
+              <div class="col">
+                <label for="ingredient" class="form-label">Ingredient</label>
+                <input id="editIngredientName" class="form-control" name="ingredient" type="text" list="ingredient-list" placeholder="Ingredient Name" required rows="3">
+                <datalist id="ingredient-list">
+                  <% for (let i = 0; i < 500; i++) { %>
+                  <option value="<%= i %>"></option>
+                  <% } %>
+                </datalist>
+              </div>
+              <div class="col-3">
+                <label for="ingredientAmount" class="form-label">Amount</label>
+                <input class="form-control" type="text" name="ingredientAmount" id="editIngredientAmount" placeholder="Ingredient Amount">
+              </div>
+              <div class="col-2">
+                <label class="form-label" for="ingredientUnit">Unit</label>
+                <select class="form-control" name="ingredientUnit" id="editIngredientUnit">
+                  <option value="" selected disabled hidden>Unit</option>
+                  <% units.forEach( unit => { %>
+                  <option value="<%= unit.name %>"><%= unit.name %></option>
+                  <% }) %>
+                </select>
+              </div>
+              <div class="col-2">
+                <!-- This label has an empty character to keep the spacing consistent. Might be a cleaner way to do this. -->
+                <label for="remove-btn" class="form-label">&nbsp;</label>
+                <button type="button" id="remove-btn" class="btn btn-danger form-control" onclick="cmsRemoveIngredient(this)">
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary mt-2" onclick="cmsAddIngredient('edit-ingredient-container')">Add Ingredient</button>
+        </div>
+
+        <!-- Instructions -->
+        <div class="mb-3">
+          <label for="instructions" class="form-label">Instructions</label>
+          <textarea class="form-control" id="editInstructions" name="instructions" rows="5" placeholder="Step-by-step cooking instructions"></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="cookTime" class="form-label">Cook Time</label>
+          <input class="form-control" id="editCookTime" name="cookTime" placeholder="Enter approximate cook time" />
+        </div>
+
+        <div class="mb-3">
+          <label for="servings" class="form-label">Servings</label>
+          <input type="number" class="form-control" id="editServings" name="servings" placeholder="Enter approximate servings" />
+        </div>
+
+        <!-- Image URL -->
+        <div class="mb-3">
+          <label for="imageURL" class="form-label">Image URL</label>
+          <input type="url" class="form-control" id="editImageURL" name="imageURL" placeholder="Enter an image URL" />
+        </div>
+
+        <!-- User ID -->
+        <div class="mb-3" style="display: none;">
+          <label for="userId" class="form-label"></label>
+          <input type="number" class="form-control" id="userId" name="userId" value="<%- user %>" readonly />
+        </div>
+
+        <!-- Recipe ID -->
+        <div class="mb-3" style="display: none;">
+          <label for="id" class="form-label"></label>
+          <input type="number" class="form-control" id="editRecipeId" name="id" readonly />
+        </div>
+
+        <button type="submit" class="btn btn-warning">Save Changes</button>
+      </form>
+    </div>
+  </div>
+  <div id="add-container" class="container" style="display: none;">
     <div class="card shadow p-4">
       <h2 class="mb-4">Add a New Recipe</h2>
       <form action="/cms/recipe/new" method="POST">
@@ -103,7 +227,7 @@
     </div>
   </div>
 
-
+  <!-- REMOVE THIS -->
   <div id="edit-container" class="container" style="display: none;">
     <div id="edit-selection" class="card shadow p-4">
       <h2 id="edit-h2" class="mb-4">Edit Recipe</h2>
@@ -222,6 +346,7 @@
     </div>
   </div>
 
+  <!-- REMOVE THIS -->
   <div id="delete-container" class="container" style="display: none;">
     <div id="delete-selection" class="card shadow p-4">
       <h2 class="mb-4">Delete Recipe</h2>
