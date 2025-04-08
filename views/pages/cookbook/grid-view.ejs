@@ -16,7 +16,9 @@
     <div user-id='<%= recipe.user_id %>' class="col recipe-card">
       <div class="card shadow-sm h-100">
         <a href="/cookbook/recipe/<%= recipe.id %>" class="text-decoration-none text-dark">
+          <% if (recipe.image_url) { %>
           <img src="<%= recipe.image_url %>" class="card-img-top" alt="Image of <%= recipe.title %>">
+          <% } %>
           <div class="card-body">
             <h5 class="card-title"><%= recipe.title %></h5>
             <p class="card-text">By <%= recipe.author %></p>
