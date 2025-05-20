@@ -6,6 +6,13 @@ const { hash, compare } = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
 const env = require('dotenv').config();
+const fs = require('fs');
+const yaml = require('js-yaml');
+const path = require('path');
+
+const file = fs.readFileSync(path.join(__dirname, '../emails.yaml'), 'utf-8');
+const parsed = yaml.load(file);
+const allowedEmails = parsed.whitelist;
 
 const accountController = {};
 
@@ -65,6 +72,13 @@ accountController.registrationRules = () => {
             .blacklist('\\\'"><&|=')
             .isEmail()
             .withMessage('A valid email is required.')
+            .custom((value) => {
+                if (!allowedEmails.includes(value)) {
+                    throw new Error('Email is not in the allowed list');
+                }
+                return true;
+            })
+            .withMessage('Account must be approved by site Admin.')
             .normalizeEmail() // refer to validator.js docs
             .custom(async (email) => {
                 const emailCheck = await accountModel.checkAccountExitsEmail(

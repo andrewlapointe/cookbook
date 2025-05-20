@@ -22,6 +22,7 @@
         "express-flash": "^0.0.2",
         "express-validator": "^7.2.1",
         "jquery": "^3.7.1",
+        "js-yaml": "^4.1.0",
         "jsonwebtoken": "^9.0.2",
         "nodemailer": "^6.10.0",
         "object-assign": "^4.1.1",
