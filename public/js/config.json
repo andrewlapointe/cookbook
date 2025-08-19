@@ -1,0 +1,54 @@
+{
+    "initialLocation": {
+        "lat": 0,
+        "lng": 0,
+        "zoom": 2
+    },
+    "dataFiles": [
+        "http://localhost:5500/data/USA_dummy.jsonl",
+        "http://localhost:5500/data/Canada_dummy.jsonl",
+        "http://localhost:5500/data/Egypt_dummy.jsonl",
+        "http://localhost:5500/data/Lesotho_dummy.jsonl",
+        "http://localhost:5500/data/Germany_dummy.jsonl",
+        "http://localhost:5500/data/India_dummy.jsonl",
+        "http://localhost:5500/data/Australia_dummy.jsonl",
+        "http://localhost:5500/data/England_dummy.jsonl",
+        "http://localhost:5500/data/South Africa_dummy.jsonl",
+        "http://localhost:5500/data/Vietnam_dummy.jsonl",
+        "http://localhost:5500/data/Brazil_dummy.jsonl",
+        "http://localhost:5500/data/Chile_dummy.jsonl"
+    ],
+    "barColorGeneratorPalette": [
+        "#36a2eb",
+        "#ff6384",
+        "#4bc0c0",
+        "#ff9f40",
+        "#9966ff",
+        "#ffcd56",
+        "#c9cbcf"
+    ],
+    "chartOptions": {
+        "buttonColor": "#fff"
+    },
+    "filters": {
+        "evidence": {
+            "chartColors": {
+                "general": ["#228B22"],
+                "pie": ["#228B22", "#339933", "#66B366", "#99CC99", "#CCE6CC"]
+            },
+            "svgIcon": "https://localhost:5500/images/microscope.svg"
+        },
+        "antibiotic": {
+            "chartColors": {
+                "general": ["#4682B4"],
+                "pie": ["#4682B4", "#338BBB", "#66A7CC", "#99C3DC", "#CCE0EC"]
+            }
+        },
+        "mechanism": {
+            "chartColors": {
+                "general": ["#FF6347"],
+                "pie": ["#FF6347", "#FF6E57", "#FF9583", "#FFBBAF", "#FFE0DA"]
+            }
+        }
+    }
+}
