@@ -1,0 +1,30 @@
+{
+  "Bacillaceae": {
+    "Bacillus": ["Bacillus thuringiensis", "Bacillus sp. CC120222-01"]
+  },
+  "Enterobacteriaceae": {
+    "Klebsiella": [
+      "Klebsiella quasipneumoniae",
+      "Klebsiella pneumoniae",
+      "Klebsiella michiganensis"
+    ],
+    "Salmonella": ["Salmonella enterica"],
+    "Enterobacter": ["Enterobacter kobei"],
+    "Escherichia": ["Escherichia coli"],
+    "Cronobacter": ["Cronobacter sakazakii"],
+    "Shigella": ["Shigella flexneri", "Shigella sonnei"]
+  },
+  "Staphylococcaceae": {
+    "Staphylococcus": ["Staphylococcus sp. HMSC063F05", "Staphylococcus aureus"]
+  },
+  "Streptococcaceae": { "Lactococcus": ["Lactococcus lactis"] },
+  "Moraxellaceae": { "Acinetobacter": ["Acinetobacter baumannii"] },
+  "Pseudomonadaceae": {
+    "Pseudomonas": ["Pseudomonas aeruginosa", "Pseudomonas sp. B12(2017)"]
+  },
+  "Enterococcaceae": { "Enterococcus": ["Enterococcus faecium"] },
+  "Vibrionaceae": { "Vibrio": ["Vibrio parahaemolyticus"] },
+  "Yersiniaceae": { "Yersinia": ["Yersinia sp. FDAARGOS_228"] },
+  "Campylobacteraceae": { "Campylobacter": ["Campylobacter devanensis"] },
+  "Bacteroidaceae": { "Bacteroides": ["Bacteroides uniformis"] }
+}
