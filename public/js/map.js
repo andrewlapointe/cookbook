@@ -10,6 +10,9 @@ class MapsGraphicalOverlay extends HTMLElement {
     this.availableFilters = [];
     this.map;
     this.dataLoader;
+    this.selectionCommitted = new Set();
+    this.selectionWorking = new Set();
+    this._treesWired = false;
   }
 
   validateConfig(config) {
@@ -55,32 +58,13 @@ class MapsGraphicalOverlay extends HTMLElement {
    * @memberof MapsGraphicalOverlay
    */
   expandMenu(menuContainer) {
-    menuContainer.querySelector("span.genome-counter").style.display = "inline";
     menuContainer.style.height = getComputedStyle(menuContainer).height;
     menuContainer.style.width = getComputedStyle(menuContainer).width;
-    const parentHeight = menuContainer.parentElement.clientHeight;
-    const allowedHeight = Math.floor(
-      menuContainer.parentElement.clientHeight * 0.95
-    );
-
-    // TODO: take another pass at this sizing. Shouldn't have to set arbitrary pixel value
-    const contentHeight =
-      this.getAbsoluteHeight(menuContainer.querySelector("#chartContent")) +
-      this.getAbsoluteHeight(menuContainer.querySelector("#menu-header")) +
-      32;
-    menuContainer.style.transition = "width 0.4s ease";
-    menuContainer.style.width = "480px";
-
-    setTimeout(() => {
-      requestAnimationFrame(() => {
-        menuContainer.style.transition = "height 0.4s ease";
-        menuContainer.style.height = `${Math.min(
-          allowedHeight,
-          contentHeight
-        )}px`;
-        menuContainer.classList.remove("collapsed");
-      });
-    }, 400);
+    menuContainer.querySelector("span.genome-counter").style.display = "inline";
+    menuContainer.querySelector("button#chart-settings-btn").style.visibility =
+      "visible";
+    menuContainer.classList.remove("collapsed");
+    return;
   }
 
   /**
@@ -92,69 +76,11 @@ class MapsGraphicalOverlay extends HTMLElement {
   collapseMenu(menuContainer) {
     menuContainer.style.height = getComputedStyle(menuContainer).height;
     menuContainer.style.width = getComputedStyle(menuContainer).width;
-
-    menuContainer.style.transition = "height 0.4s ease";
-    menuContainer.style.height = "50px";
-
-    // After height animation finishes, transition width
-    setTimeout(() => {
-      menuContainer.style.transition = "width 0.4s ease";
-      void menuContainer.offsetWidth;
-      menuContainer.style.width = "180px";
-      menuContainer.classList.add("collapsed");
-      menuContainer.querySelector("span.genome-counter").style.display = "none";
-    }, 400);
-  }
-
-  /**
-   * @description Handles opening and closing of filter menu sections.
-   * @date 29/07/2025
-   * @param {Node} section
-   * @memberof MapsGraphicalOverlay
-   */
-  openMenu(section) {
-    const setDropdownHeight = (menuContent, sectionContainer) => {
-      const sectionCount = Object.keys(this.config.filters).length + 1; // Add a section to account for the clear filters button
-      const smallContainerHeight = this.getAbsoluteHeight(sectionContainer);
-      const menuHeight = parseInt(menuContent.style.maxHeight);
-
-      const calcHeight = menuHeight - smallContainerHeight * sectionCount;
-
-      const sectionHeader = sectionContainer.querySelector(
-        ".menu-section-header"
-      );
-      const headerHeight = this.getAbsoluteHeight(sectionHeader);
-      const sectionSearch = sectionContainer.querySelector(
-        ".menu-section-search"
-      );
-      const searchHeight = this.getAbsoluteHeight(sectionSearch);
-      const sectionScroll = sectionContainer.querySelector(".menu-sub-section");
-
-      sectionContainer.style.height =
-        Math.min(sectionContainer.scrollHeight, calcHeight) + "px";
-
-      sectionScroll.style.maxHeight = `${
-        parseInt(sectionContainer.style.height) - headerHeight - searchHeight
-      }px`;
-    };
-    // TODO: Change to querySelector definitions to make less brittle
-    const sectionContainer = section.parentElement;
-    const menuContent = sectionContainer.parentElement;
-    const filterMenu = menuContent.parentElement;
-    if (!sectionContainer.classList.contains("menu-opened")) {
-      const calcContentHeight = () => {
-        menuContent.style.maxHeight = `${
-          filterMenu.offsetHeight -
-          this.getAbsoluteHeight(filterMenu.querySelector("div#menu-header"))
-        }px`;
-      };
-      calcContentHeight();
-      setDropdownHeight(menuContent, sectionContainer);
-    } else {
-      requestAnimationFrame(() => {
-        sectionContainer.style.height = "44px";
-      });
-    }
+    menuContainer.classList.add("collapsed");
+    menuContainer.querySelector("span.genome-counter").style.display = "none";
+    menuContainer.querySelector("button#chart-settings-btn").style.visibility =
+      "hidden";
+    return;
   }
 
   clearMapMarkers() {
@@ -183,39 +109,52 @@ class MapsGraphicalOverlay extends HTMLElement {
    * @return {google.maps.marker.AdvancedMarkerElement}
    * @memberof MapsGraphicalOverlay
    */
-  createPin(locationObj) {
+  createPin(locationObj, key) {
     const position = locationObj.getCoordinates();
     // Check for NaN
+    const chartsEnabled = this.config.mapOptions.showMarkerPieCharts;
+    const markerContent = chartsEnabled
+      ? this.createPieChart(locationObj)
+      : null;
+
     if (position.lat === position.lat && position.lng === position.lng) {
       const marker = new google.maps.marker.AdvancedMarkerElement({
         map: this.map,
         position: position,
         gmpClickable: true,
-        content: this.createPieChart(locationObj),
+        content: markerContent,
       });
       marker.addListener("gmp-click", () => {
-        this.createCharts(locationObj);
+        const active = this.shadow.querySelector(
+          "#charts button.active-chart"
+        ).id;
+        this.createCharts(locationObj, key, active);
 
         this.expandMenu(this.shadow.getElementById("charts"));
         this.map.panTo(marker.position);
       });
+      marker.isStateLevel = locationObj.isStateLevel;
 
-      const checkZoom = (firstCall = false) => {
-        if (firstCall || this.markersArray.includes(marker)) {
-          const zoom = this.map.getZoom();
+      const checkZoom = (marker) => {
+        const zoom = this.map.getZoom();
 
-          if (zoom < 4) {
-            marker.map = locationObj.isStateLevel ? null : this.map;
-          } else {
-            marker.map = locationObj.isStateLevel ? this.map : null;
-          }
+        if (zoom < 4) {
+          marker.map = marker.isStateLevel ? null : this.map;
+        } else {
+          marker.map = marker.isStateLevel ? this.map : null;
         }
       };
 
       if (locationObj.isStateLevel || locationObj.country == "USA") {
-        checkZoom(true);
-        this.map.addListener("zoom_changed", () => {
-          checkZoom();
+        checkZoom(marker);
+      }
+      if (!this._zoomChangeListener) {
+        this._zoomChangeListener = this.map.addListener("zoom_changed", () => {
+          this.markersArray.forEach((m) => {
+            if (m.isStateLevel) {
+              checkZoom(m);
+            }
+          });
         });
       }
 
@@ -230,13 +169,11 @@ class MapsGraphicalOverlay extends HTMLElement {
     const includeOther = false;
 
     const ringGeom = [
-      { cutout: "60%", radius: "80%" }, // outer
-      { cutout: "40%", radius: "60%" }, // middle
-      { cutout: "20%", radius: "35%" }, // inner
+      { cutout: "75%", radius: "90%" }, // outer
+      { cutout: "55%", radius: "75%" }, // middle
+      { cutout: "20%", radius: "55%" }, // inner
     ];
     // --------------------------------------
-
-    // Container
     const chartContainer = document.createElement("div");
     chartContainer.style.position = "relative";
     chartContainer.style.width = `${size}px`;
@@ -259,25 +196,47 @@ class MapsGraphicalOverlay extends HTMLElement {
     const canvases = [mkCanvas(1), mkCanvas(2), mkCanvas(3)];
     canvases.forEach((c) => chartContainer.appendChild(c));
 
-    const rings = locationObj.filterCategories.map((dim, i) => {
-      const title = toTitleCase(dim);
+    const candidates = locationObj.filterCategories.map((dim) => {
+      const title = this.config.filters.find(
+        (filter) => filter.column === dim
+      ).alias;
+      const display = this.config.filters.find(
+        (filter) => filter.column === dim
+      ).onPieChart;
       const { labels, counts } = locationObj.getTopNDatasetForDimension(
         dim,
         topN,
         includeOther
       );
-      const palette = this.config.filters[dim].chartColors.pie;
+      const palette = this.config.filters.find((obj) => obj.column === dim)
+        .chartColors.pie;
       const backgroundColor = labels.map(
         (_, idx) => palette[idx % palette.length]
       );
-      return {
-        title,
-        labels,
-        counts,
-        backgroundColor,
-        cutout: ringGeom[i].cutout,
-        radius: ringGeom[i].radius,
-      };
+      return { title, labels, counts, backgroundColor, display };
+    });
+
+    const nonEmpty = candidates.filter(
+      (r) => r.display && Array.isArray(r.counts) && r.counts.some((v) => v > 0)
+    );
+
+    // Remove this block to not mix pins and charts
+    if (nonEmpty.length === 0) {
+      return null;
+    }
+
+    const innerFirstGeom = [...ringGeom].reverse(); // [{inner}, {middle}, {outer}]
+    const rings = nonEmpty
+      .slice(0, innerFirstGeom.length)
+      .map((r, i) => ({ ...r, ...innerFirstGeom[i] }));
+
+    canvases.forEach((c, i) => {
+      if (i < rings.length) {
+        c.style.display = "block";
+        c.style.zIndex = String(i + 1); // inner lowest, outer highest
+      } else {
+        c.style.display = "none";
+      }
     });
 
     const charts = rings.map((ring, i) => {
@@ -298,7 +257,7 @@ class MapsGraphicalOverlay extends HTMLElement {
         options: {
           responsive: false,
           animation: false,
-          events: [], // charts don't handle events. overlay will
+          events: [],
           cutout: ring.cutout,
           radius: ring.radius,
           plugins: {
@@ -309,7 +268,6 @@ class MapsGraphicalOverlay extends HTMLElement {
       });
     });
 
-    // Shared tooltip element
     const ensureTooltip = () => {
       let el = this.shadow.getElementById("chartjs-tooltip");
       if (!el) {
@@ -325,7 +283,6 @@ class MapsGraphicalOverlay extends HTMLElement {
     };
     const tooltipEl = ensureTooltip();
 
-    // Overlay to capture mouse (top-most)
     const overlay = document.createElement("div");
     overlay.style.position = "absolute";
     overlay.style.left = "0";
@@ -336,9 +293,7 @@ class MapsGraphicalOverlay extends HTMLElement {
     overlay.style.pointerEvents = "auto";
     chartContainer.appendChild(overlay);
 
-    // Helpers: figure out ring under cursor (by radius), then show all segments for that ring
     const getCenter = () => {
-      // any canvas is fine (same size)
       const rect = canvases[0].getBoundingClientRect();
       return {
         x: rect.left + rect.width / 2,
@@ -347,10 +302,8 @@ class MapsGraphicalOverlay extends HTMLElement {
       };
     };
 
-    // Extract pixel radii from chart
     const getRingRadii = (chart) => {
       const meta = chart.getDatasetMeta(0);
-      // pick any arc element
       const el = meta?.data?.[0];
       if (!el) return null;
       return { inner: el.innerRadius, outer: el.outerRadius };
@@ -367,11 +320,11 @@ class MapsGraphicalOverlay extends HTMLElement {
         const bullet = `<span class="tooltip-bullet" style="color:${color}">•</span>`;
         const label = ring.labels[i];
         const value = ring.counts[i];
-        rowsHtml += `<tr><td>${bullet} <strong>${label}</strong>: ${value}</td></tr>`;
+        rowsHtml += `<tr><td>${bullet}${label}: ${value}</td></tr>`;
       }
 
       const html = `
-      <thead><tr><th>${ring.title}</th></tr></thead>
+      <thead><tr><th>${locationObj.name} - ${ring.title}</th></tr></thead>
       <tbody>${rowsHtml}</tbody>
     `;
       tooltipEl.querySelector("table").innerHTML = html;
@@ -391,8 +344,6 @@ class MapsGraphicalOverlay extends HTMLElement {
       const dy = e.clientY - cy;
       const r = Math.hypot(dx, dy);
 
-      // find which ring the radius falls into (using actual chart-computed radii)
-      // start from outermost so it "wins" if boundaries touch
       let activeRingIndex = -1;
       for (let i = charts.length - 1; i >= 0; i--) {
         const rr = getRingRadii(charts[i]);
@@ -449,7 +400,7 @@ class MapsGraphicalOverlay extends HTMLElement {
    * @param {number} [maxBars=10]
    * @memberof MapsGraphicalOverlay
    */
-  createBarChart(locationObj, dimension, chartContainer, maxBars = 10) {
+  createBarChart(locationObj, filterConfig, chartContainer) {
     let newChart = document.createElement("canvas");
     newChart.style.height = "400px";
     newChart.style.width = "400px";
@@ -458,11 +409,39 @@ class MapsGraphicalOverlay extends HTMLElement {
     chartContainer.style.display = "none";
 
     const { labels, datasets } = locationObj.getStackedBarDatasets({
-      dimension: dimension,
-      groupBy: "genus",
-      sort: "none",
-      palette: this.config.barColorGeneratorPalette,
+      dimension: filterConfig.column,
+      groupBy: this.userChartOptions?.stackType ?? "genus",
+      sort: this.userChartOptions?.sort ?? "none",
+      palette: this.config.chartOptions.barColorGeneratorPalette,
     });
+
+    datasets.map((ds) => {
+      ds.minBarLength = 6;
+      ds.data.map((value, i) => (ds.data[i] = value === 0 ? null : value));
+    });
+
+    datasets.filter((ds) => {});
+    const noDataPlugin = {
+      id: "noData",
+      afterDraw(chart) {
+        const { datasets } = chart.data;
+        const hasData = datasets.some((ds) => ds.data && ds.data.length > 0);
+
+        if (!hasData) {
+          const {
+            ctx,
+            chartArea: { width, height },
+          } = chart;
+          ctx.save();
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.font = "16px sans-serif";
+          ctx.fillStyle = "rgba(100, 100, 100, 0.8)";
+          ctx.fillText("No data available", width / 2, height / 2);
+          ctx.restore();
+        }
+      },
+    };
 
     const ctx = newChart.getContext("2d");
     const chart = new Chart(ctx, {
@@ -472,6 +451,9 @@ class MapsGraphicalOverlay extends HTMLElement {
         datasets,
       },
       options: {
+        skipNull: true,
+
+        maxBarThickness: 60,
         animation: false,
         plugins: {
           legend: {
@@ -515,6 +497,7 @@ class MapsGraphicalOverlay extends HTMLElement {
           },
         },
       },
+      plugins: [noDataPlugin],
     });
   }
 
@@ -523,9 +506,10 @@ class MapsGraphicalOverlay extends HTMLElement {
    * @param {LocationData} locationObj
    * @memberof MapsGraphicalOverlay
    */
-  createCharts(locationObj) {
+  createCharts(locationObj, key, active = null) {
     const name = locationObj.name;
     const chartContainer = this.shadow.getElementById("charts");
+    chartContainer.setAttribute("locationKey", key);
 
     chartContainer.querySelector(
       ".menu-title"
@@ -540,10 +524,12 @@ class MapsGraphicalOverlay extends HTMLElement {
       selectors.removeChild(selectors.firstChild);
     }
 
-    const createChartSection = (sectionId) => {
+    const createChartSection = (sectionObj) => {
+      const sectionId = sectionObj.column;
       const sectionContainer = document.createElement("div");
       sectionContainer.classList.add("chartSection");
       sectionContainer.id = sectionId;
+      // TODO: check this height
       sectionContainer.style.width = "400px";
       sectionContainer.style.height = "400px";
       sectionContainer.style.display = "none";
@@ -553,46 +539,32 @@ class MapsGraphicalOverlay extends HTMLElement {
     };
 
     let promises = [];
-    for (let filter of Object.keys(this.config.filters)) {
+    for (let filter of this.config.filters) {
       promises.push(
         new Promise((resolve, reject) => {
           const chartContainer = createChartSection(filter);
           this.createBarChart(locationObj, filter, chartContainer);
           let newButton = HTMLhelper.chartSelector(
             filter,
-            this.config.filters[filter].chartColors.general[0]
+            filter.chartColors.general[0]
           );
 
           selectors.insertAdjacentHTML("beforeend", newButton);
         })
       );
     }
-    // Options tab
-    // let svgOnly = true;
-    // const optionsTab = HTMLhelper.chartSelector(
-    //   "options",
-    //   "inherit",
-    //   `<svg
-    //     xmlns="http://www.w3.org/2000/svg"
-    //     height="24px"
-    //     viewBox="0 -960 960 960"
-    //     width="24px"
-    //     fill="#1f1f1f"
-    //   >
-    //     <path d="M440-120v-240h80v80h320v80H520v80h-80Zm-320-80v-80h240v80H120Zm160-160v-80H120v-80h160v-80h80v240h-80Zm160-80v-80h400v80H440Zm160-160v-240h80v80h160v80H680v80h-80Zm-480-80v-80h400v80H120Z" />
-    //   </svg> `,
-    //   svgOnly
-    // );
-    // const optionsSection = createChartSection("options");
-    // optionsSection.innerHTML = HTMLhelper.chartOptions();
 
-    // selectors.insertAdjacentHTML("beforeend", optionsTab);
     Promise.all(promises);
-    chartBody.firstChild.classList.add("active-chart");
+    if (active) {
+      chartBody.querySelector(`#${active}`).classList.add("active-chart");
+    } else {
+      chartBody.firstChild.classList.add("active-chart");
+    }
 
     let buttons = selectors.querySelectorAll("button");
+    const activeButton = selectors.querySelector(`#${active}`) || buttons[0];
     let charts = chartBody.querySelectorAll("div.chartSection");
-    buttons[0].classList.add("active-chart");
+    activeButton.classList.add("active-chart");
     buttons.forEach((btn) => {
       btn.addEventListener("click", function () {
         btn.classList.add("active-chart");
@@ -625,7 +597,10 @@ class MapsGraphicalOverlay extends HTMLElement {
     if (locations[key]) {
       locations[key].updateLocationData(data);
     } else {
-      locations[key] = new LocationData(data, Object.keys(this.config.filters));
+      locations[key] = new LocationData(
+        data,
+        this.config.filters?.map((f) => f.column) ?? []
+      );
       switch (mapLevel) {
         case "global":
           try {
@@ -652,7 +627,8 @@ class MapsGraphicalOverlay extends HTMLElement {
    * @memberof MapsGraphicalOverlay
    */
   generateFilters(newFilters) {
-    for (let filterType of Object.keys(this.config.filters)) {
+    for (let filterConfigObj of this.config.filters) {
+      const filterType = filterConfigObj.column;
       this.availableFilters[filterType] ??= [];
       if (newFilters[filterType]) {
         this.availableFilters[filterType] = newFilters[filterType].unique || [];
@@ -661,6 +637,9 @@ class MapsGraphicalOverlay extends HTMLElement {
   }
 
   generateMenu() {
+    this._menuAbort?.abort(); // kill listeners from previous renders
+    this._menuAbort = new AbortController(); // new bucket for this render
+    const { signal } = this._menuAbort;
     const menuContainer = this.shadow.getElementById("menu");
     let isChecked = (section, value) => {
       if (
@@ -686,7 +665,14 @@ class MapsGraphicalOverlay extends HTMLElement {
           isChecked(section, value)
         );
       }
-      filterSections.push({ name: section, string: htmlString });
+      // SHORTCUT
+      filterSections.push({
+        name: this.config.filters.find((filter) => filter.column === section)
+          .alias,
+        string: htmlString,
+        icon: this.config.filters.find((filter) => filter.column === section)
+          .svgIcon,
+      });
     }
     const taxonObject = this.dataLoader.getTaxonomyObj();
     const firstSpecies = Object.values(Object.values(taxonObject)[0])[0]
@@ -723,81 +709,100 @@ class MapsGraphicalOverlay extends HTMLElement {
       });
     };
 
+    const sidebarContainer = menuContainer.querySelector(
+      "div#sidebar-menu-group"
+    );
+
+    const clearAllFilters = (reload = true) => {
+      for (let filter of Object.keys(this.dataLoader.activeFilters)) {
+        this.dataLoader.activeFilters[filter].clear();
+      }
+      totalFilterCounter.textContent = 0;
+      sidebarContainer
+        .querySelectorAll(".section-filter-count")
+        .forEach((counter) => {
+          counter.textContent = 0;
+          counter.classList.add("hide");
+        });
+      sidebarContainer
+        .querySelectorAll("input.form-check-input")
+        .forEach((checkbox) => {
+          checkbox.checked = false;
+        });
+      if (reload) {
+        this.reload();
+      }
+    };
+
+    sidebarContainer
+      .querySelector(".clear-btn")
+      .addEventListener("click", clearAllFilters, { signal });
+
     menuContainer
       .querySelectorAll(".menu-section input")
       .forEach(function (section) {
-        section.addEventListener("input", menuSearchFunction);
+        section.addEventListener("input", menuSearchFunction, { signal });
       });
 
     const totalFilterCounter = menuContainer.querySelector(
       "#total-filter-count"
     );
 
-    menuContainer.querySelectorAll(".form-check-input").forEach((checkbox) => {
-      checkbox.addEventListener("change", (event) => {
-        let checkbox = event.currentTarget;
-        let type = checkbox.getAttribute("filter-type");
-        const menuHeader =
-          checkbox.parentElement.parentElement.parentElement.querySelector(
-            ".menu-section-header"
-          );
-        let sectionFilterCounter = menuHeader.querySelector(
-          ".section-filter-count"
-        );
-        sectionFilterCounter.style.backgroundColor = hexToRgba(
-          this.config.filters[type].chartColors.general[0],
-          0.7
-        );
-        if (checkbox.checked) {
-          this.dataLoader.addFilter(type, checkbox.value);
-          totalFilterCounter.textContent =
-            Number(totalFilterCounter.textContent) + 1;
-          sectionFilterCounter.textContent =
-            Number(sectionFilterCounter.textContent) + 1;
-          sectionFilterCounter.classList.remove("hide");
-        } else {
-          this.dataLoader.removeFilter(type, this.value);
-          totalFilterCounter.textContent =
-            Number(totalFilterCounter.textContent) - 1;
-          sectionFilterCounter.textContent =
-            Number(sectionFilterCounter.textContent) - 1;
-          if (Number(sectionFilterCounter.textContent) == 0) {
-            sectionFilterCounter.classList.add("hide");
-          }
-        }
+    // Reset filter counters
+    const reload = false;
+    clearAllFilters(reload);
 
-        this.reload();
-      });
+    menuContainer.querySelectorAll(".form-check-input").forEach((checkbox) => {
+      checkbox.addEventListener(
+        "change",
+        (event) => {
+          let checkbox = event.currentTarget;
+          let type = checkbox.getAttribute("filter-type");
+          const menuHeader =
+            checkbox.parentElement.parentElement.parentElement.querySelector(
+              ".menu-section-header"
+            );
+          let sectionFilterCounter = menuHeader.querySelector(
+            ".section-filter-count"
+          );
+          sectionFilterCounter.style.backgroundColor = hexToRgba(
+            this.config.filters.find((obj) => obj.column === type).chartColors
+              .general[0],
+            0.7
+          );
+          if (checkbox.checked) {
+            this.dataLoader.addFilter(type, checkbox.value);
+            totalFilterCounter.textContent =
+              Number(totalFilterCounter.textContent) + 1;
+            sectionFilterCounter.textContent =
+              Number(sectionFilterCounter.textContent) + 1;
+            sectionFilterCounter.classList.remove("hide");
+          } else {
+            this.dataLoader.removeFilter(type, checkbox.value);
+            totalFilterCounter.textContent =
+              Number(totalFilterCounter.textContent) - 1;
+            sectionFilterCounter.textContent =
+              Number(sectionFilterCounter.textContent) - 1;
+            if (Number(sectionFilterCounter.textContent) == 0) {
+              sectionFilterCounter.classList.add("hide");
+            }
+          }
+
+          this.reload();
+        },
+        { signal }
+      );
     });
 
-    const sidebarContainer = menuContainer.querySelector(
-      "div#sidebar-menu-group"
-    );
+    const downloadATag = sidebarContainer.querySelector("#download-data-btn");
+    const csvBlob = this.dataLoader.getAllDataBlob();
+    const url = URL.createObjectURL(csvBlob);
+    downloadATag.href = url;
+    downloadATag.download = "data.csv";
 
-    sidebarContainer
-      .querySelector(".clear-btn")
-      .addEventListener("click", () => {
-        for (let filter of Object.keys(this.dataLoader.activeFilters)) {
-          this.dataLoader.activeFilters[filter].clear();
-        }
-        totalFilterCounter.textContent = 0;
-        sidebarContainer
-          .querySelectorAll(".section-filter-count")
-          .forEach((counter) => {
-            counter.textContent = 0;
-            counter.classList.add("hide");
-          });
-        sidebarContainer
-          .querySelectorAll("input.form-check-input")
-          .forEach((checkbox) => {
-            checkbox.checked = false;
-          });
-        this.reload();
-      });
-
-    sidebarContainer
-      .querySelector("#show-filters-button")
-      .addEventListener("click", function () {
+    sidebarContainer.querySelector("#show-filters-button").addEventListener(
+      "click",
+      function () {
         sidebarContainer.classList.toggle("open");
         sidebarContainer
           .querySelector(".menu-content")
@@ -846,40 +851,126 @@ class MapsGraphicalOverlay extends HTMLElement {
             bottomLine.setAttribute("x2", "25");
           });
         }
-      });
+      },
+      { signal }
+    );
 
     const chartContainer = this.shadow.getElementById("charts");
 
-    chartContainer
-      .querySelector("#charts-menu-chevron")
-      .addEventListener("click", () => {
+    chartContainer.querySelector("#charts-menu-chevron").addEventListener(
+      "click",
+      () => {
         if (chartContainer.classList.contains("collapsed")) {
           this.expandMenu(chartContainer);
         } else {
           this.collapseMenu(chartContainer);
         }
+      },
+      { signal }
+    );
+
+    const optionsBodyInnerHtml = HTMLhelper.chartOptions();
+    const optionsDropdown = chartContainer.querySelector(
+      "#chart-settings-dropdown"
+    );
+    optionsDropdown.innerHTML = optionsBodyInnerHtml;
+
+    const show = () => {
+      // let layout update, then add the "open" class to trigger transition
+      const cs = getComputedStyle(optionsDropdown);
+      requestAnimationFrame(() => {
+        optionsDropdown.classList.add("open");
       });
+    };
+
+    const hide = () => {
+      // THIS FUNCTION DOES NOT WORK
+      // wait for the transition to finish, THEN display:none
+      const cs = getComputedStyle(optionsDropdown);
+
+      optionsDropdown.addEventListener(
+        "transitionend",
+        (e) => {
+          if (e.propertyName !== "opacity") return; // guard for multi-prop transitions
+          if (e.target !== optionsDropdown) {
+            return;
+          }
+        },
+        { signal }
+      );
+      optionsDropdown.classList.remove("open");
+    };
+
+    const optionsBtn = chartContainer.querySelector(
+      "button#chart-settings-btn"
+    );
+    const chartOptionsOnclick = () => {
+      const isOpen = optionsDropdown.classList.contains("open");
+      if (isOpen) {
+        hide();
+      } else {
+        show();
+      }
+      optionsBtn.classList.toggle("rotate");
+    };
+    optionsBtn.addEventListener("click", chartOptionsOnclick, { signal });
+
+    const updateChartOptions = () => {
+      let userChartOptions = {
+        stackType: "genus",
+        sort: "none",
+      };
+      optionsDropdown.querySelectorAll("input").forEach((input) => {
+        if (input.checked) {
+          const categoryID = input.parentElement.parentElement.parentElement.id;
+          switch (categoryID) {
+            case "stack-mode":
+              userChartOptions.stackType = input.value;
+              break;
+            case "sort-mode":
+              userChartOptions.sort = input.value;
+              break;
+          }
+        }
+      });
+      this.userChartOptions = userChartOptions;
+    };
+    optionsDropdown.querySelectorAll("input").forEach((input) => {
+      input.addEventListener(
+        "change",
+        (e) => {
+          const active = chartContainer.querySelector("button.active-chart").id;
+          updateChartOptions();
+          const key = chartContainer.getAttribute("locationKey");
+          this.createCharts(this.locationObjs[key], key, active);
+        },
+        { signal }
+      );
+    });
+    updateChartOptions(); // set default chart options
 
     const sectionHeader = menuContainer.querySelectorAll(
       "div.menu-section-header"
     );
 
     sectionHeader.forEach((section) =>
-      section.querySelector(".chevron").addEventListener("click", () => {
-        sectionHeader.forEach((otherSection) => {
-          if (
-            section !== otherSection &&
-            otherSection.parentElement.classList.contains("menu-opened")
-          ) {
-            this.openMenu(otherSection);
-            otherSection.parentElement.classList.toggle("menu-opened");
-            otherSection.classList.toggle("flip");
-          }
-        });
-        this.openMenu(section);
-        section.parentElement.classList.toggle("menu-opened");
-        section.classList.toggle("flip");
-      })
+      section.querySelector(".chevron").addEventListener(
+        "click",
+        () => {
+          sectionHeader.forEach((otherSection) => {
+            if (
+              section !== otherSection &&
+              otherSection.parentElement.classList.contains("menu-opened")
+            ) {
+              otherSection.parentElement.classList.toggle("menu-opened");
+              otherSection.classList.toggle("flip");
+            }
+          });
+          section.parentElement.classList.toggle("menu-opened");
+          section.classList.toggle("flip");
+        },
+        { signal }
+      )
     );
   }
 
@@ -898,9 +989,9 @@ class MapsGraphicalOverlay extends HTMLElement {
     // so that there are no duplicate map markers
 
     for await (const value of this.dataLoader.dataGenerator()) {
-      const data = Object.values(value)[0];
+      const data = value;
       // Handle state and country data
-      if (data.stateProv) {
+      if (data.state_province) {
         // Country
         if (data.country) {
           let mapLevel = "country";
@@ -908,7 +999,12 @@ class MapsGraphicalOverlay extends HTMLElement {
         }
         // State
         let mapLevel = "stateProv";
-        this.createUpdateLocationObj(data.stateProv, data, locations, mapLevel);
+        this.createUpdateLocationObj(
+          data.state_province,
+          data,
+          locations,
+          mapLevel
+        );
       } else {
         // Country without state
         if (data.country) {
@@ -926,18 +1022,20 @@ class MapsGraphicalOverlay extends HTMLElement {
       this.createUpdateLocationObj("global", data, locations, mapLevel);
     }
 
+    this.locationObjs = locations;
+
     return locations;
   }
 
   loadMap(locationObjs, reloadMenu) {
     let promises = [];
     // State
-    for (let location of Object.values(locationObjs)) {
-      if (location.country) {
+    for (let key of Object.keys(locationObjs)) {
+      if (locationObjs[key].country) {
         promises.push(
           new Promise((resolve, reject) => {
             try {
-              const marker = this.createPin(location);
+              const marker = this.createPin(locationObjs[key], key);
               if (marker) {
                 this.markersArray.push(marker);
               }
@@ -951,7 +1049,7 @@ class MapsGraphicalOverlay extends HTMLElement {
     }
     promises.push(
       new Promise((resolve, reject) => {
-        this.createCharts(locationObjs.global);
+        this.createCharts(locationObjs.global, "global");
         this.expandMenu(this.shadow.getElementById("charts"));
       })
     );
@@ -967,11 +1065,14 @@ class MapsGraphicalOverlay extends HTMLElement {
 
     const openModalBtn = this.shadow.querySelector("#openTaxonModal");
     openModalBtn.addEventListener("click", (e) => {
+      this.selectionWorking = new Set(this.selectionCommitted || []);
+      this.applySelectionSet(this.selectionWorking);
       this.openModal();
     });
 
     this.map.addListener("click", () => {
-      this.createCharts(locationObjs.global);
+      this.createCharts(locationObjs.global, "global");
+      this.expandMenu(this.shadow.getElementById("charts"));
     });
   }
 
@@ -989,6 +1090,30 @@ class MapsGraphicalOverlay extends HTMLElement {
     const taxonJSON = await response.json();
     modalBody.innerHTML = HTMLhelper.taxonomyModal(taxonJSON);
 
+    // commit/rollback helpers
+    this.keyOf = (o) => `${o.family}|${o.genus}|${o.species}`;
+
+    this.readSelectionSet = () => new Set(getSelectedSpecies().map(this.keyOf));
+    this.applySelectionSet = (selSet) => {
+      clearAllSelections();
+      selSet.forEach((key) => {
+        const [family, genus, species] = key.split("|");
+        const cb = this.shadow.querySelector(
+          `#available-taxonomy-tree input.taxon-checkbox[data-level="species"][data-family="${family}"][data-genus="${genus}"][data-species="${species}"]`
+        );
+        if (cb && !cb.checked) {
+          cb.checked = true;
+          syncFromLeft.call(this, cb);
+        }
+      });
+
+      this.shadow
+        .querySelectorAll("#available-taxonomy-tree details")
+        .forEach((d) => recomputeSubtree(d));
+      this.shadow
+        .querySelectorAll("#selectedTaxonomies details")
+        .forEach((d) => recomputeSubtree(d));
+    };
     const searchBoxHost = this.shadow.querySelector("#modal-search-box");
     const searchInput = this.shadow.querySelector("#taxonomy-search");
     const searchClear = this.shadow.querySelector("#taxonomy-search-clear");
@@ -996,16 +1121,97 @@ class MapsGraphicalOverlay extends HTMLElement {
     const leftRoot = this.shadow.querySelector("#available-taxonomy-tree");
     const rightTree = this.shadow.querySelector("#selected-tree");
 
+    const closeBtn = modal.querySelector(".close");
+    const form = this.shadow.querySelector("#dataForm");
+    const clearBtn = modal.querySelector("#clearBtn");
+    const loadBtn = modal.querySelector("#loadBtn");
+    const modalBanner = modal.querySelector("#msgBanner");
+    this.ui = {
+      mapWrap,
+      content,
+      backdrop,
+      modal,
+      dialog,
+      closeBtn,
+      clearBtn,
+      modalBanner,
+      loadBtn,
+    };
+    function stopToggle(root) {
+      if (!root) return;
+
+      // prevent clicking the checkbox from toggling <details>
+      root.addEventListener(
+        "click",
+        (e) => {
+          if (e.target.closest("input.taxon-checkbox")) e.stopPropagation();
+        },
+        true
+      );
+    }
+
+    const updateMessage = () => {
+      const warningThreshold = 20;
+      const count = getSelectedCount();
+      let messageText;
+      this.ui.modalBanner.classList.remove("warn", "success");
+
+      if (count === 0) {
+        messageText = "Please select at least 1 genome.";
+        this.ui.loadBtn.classList.add("disabled");
+      } else if (count >= warningThreshold) {
+        this.ui.loadBtn.classList.remove("disabled");
+        messageText = `You have selected ${count} genomes, which may result in long load time.`;
+        this.ui.modalBanner.classList.add("warn");
+      } else {
+        this.ui.loadBtn.classList.remove("disabled");
+        messageText = `You have selected ${count} genomes.`;
+        this.ui.modalBanner.classList.add("success");
+      }
+      this.ui.modalBanner.querySelector("p").textContent = messageText;
+    };
+
+    if (!this._treesWired) {
+      const leftRoot = this.shadow.querySelector("#available-taxonomy-tree");
+      const rightRoot = this.shadow.querySelector("#selectedTaxonomies");
+
+      // prevent <summary> toggling when clicking checkboxes (capture phase)
+      function stopToggle(root) {
+        if (!root) return;
+        root.addEventListener(
+          "click",
+          (e) => {
+            if (e.target.closest("input.taxon-checkbox")) e.stopPropagation();
+          },
+          true
+        );
+      }
+      stopToggle(leftRoot);
+      stopToggle(rightRoot);
+
+      // LEFT → RIGHT (delegated)
+      leftRoot.addEventListener("change", (e) => {
+        const cb = e.target.closest("input.taxon-checkbox");
+        if (!cb) return; // ignore non-checkbox changes
+        syncFromLeft.call(this, cb); // your existing mirroring logic
+        this.selectionWorking = this.readSelectionSet(); // keep working state in sync
+        updateMessage(); // refresh banner
+      });
+
+      // RIGHT → LEFT (delegated)
+      rightRoot.addEventListener("change", (e) => {
+        const cb = e.target.closest("input.taxon-checkbox");
+        if (!cb) return;
+        syncFromRight.call(this, cb); // your existing removal logic
+        this.selectionWorking = this.readSelectionSet();
+        updateMessage();
+      });
+
+      this._treesWired = true;
+    }
+
     const QS = (root, sel) => root.querySelector(sel);
     const QSA = (root, sel) => Array.from(root.querySelectorAll(sel));
-
-    const debounce = (fn, ms = 120) => {
-      let t;
-      return (...args) => {
-        clearTimeout(t);
-        t = setTimeout(() => fn.apply(this, args), ms);
-      };
-    };
 
     const filterLeftTree = (raw) => {
       const q = (raw || "").trim().toLowerCase();
@@ -1097,8 +1303,10 @@ class MapsGraphicalOverlay extends HTMLElement {
     };
 
     // Wire the input & clear button
-    const runFilter = debounce(() => filterLeftTree(searchInput.value), 120);
-    searchInput.addEventListener("input", runFilter);
+    searchInput.addEventListener(
+      "input",
+      debounce(() => filterLeftTree(searchInput.value), 120)
+    );
     // searchClear.addEventListener("click", () => {
     //   searchInput.value = "";
     //   filterLeftTree("");
@@ -1124,12 +1332,6 @@ class MapsGraphicalOverlay extends HTMLElement {
       return `${
         side === "avail" ? "#available-taxonomy-tree" : "#selectedTaxonomies"
       } input.taxon-checkbox${path}`;
-    };
-
-    const stopToggle = (cbRoot) => {
-      QSA(cbRoot, "input.taxon-checkbox").forEach((cb) =>
-        cb.addEventListener("click", (e) => e.stopPropagation())
-      );
     };
 
     const getSelectedCount = () => {
@@ -1169,10 +1371,8 @@ class MapsGraphicalOverlay extends HTMLElement {
         summary.innerHTML = `
         <span class="tree-chevron" aria-hidden="true"></span>
         <input type="checkbox" class="taxon-checkbox" id="${famId}"
-          data-level="family" data-family="${family}" data-label="${toTitleCase(
-          family
-        )}">
-        <label for="${famId}">${toTitleCase(family)}</label>
+          data-level="family" data-family="${family}" data-label="${family}">
+        <label for="${famId}">${family}</label>
         `;
         famDetails.appendChild(summary);
         famDetails.appendChild(document.createElement("ul"));
@@ -1194,10 +1394,8 @@ class MapsGraphicalOverlay extends HTMLElement {
         summary.innerHTML = `
         <span class="tree-chevron" aria-hidden="true"></span>
         <input type="checkbox" class="taxon-checkbox" id="${genId}"
-          data-level="genus" data-family="${family}" data-genus="${genus}" data-label="${toTitleCase(
-          genus
-        )}">
-        <label for="${genId}">${toTitleCase(genus)}</label>
+          data-level="genus" data-family="${family}" data-genus="${genus}" data-label="${genus}">
+        <label for="${genId}">${genus}</label>
         `;
         genDetails.appendChild(summary);
         genDetails.appendChild(document.createElement("ul"));
@@ -1220,10 +1418,8 @@ class MapsGraphicalOverlay extends HTMLElement {
         leaf.innerHTML = `
       <div>
         <input type="checkbox" class="taxon-checkbox" id="${id}"
-          data-level="species" data-family="${family}" data-genus="${genus}" data-species="${species}" data-label="${toTitleCase(
-          species
-        )}" checked>
-        <label for="${id}">${toTitleCase(species)}</label>
+          data-level="species" data-family="${family}" data-genus="${genus}" data-species="${species}" data-label="${species}" checked>
+        <label for="${id}">${species}</label>
       </div>
     `;
         ul.appendChild(leaf);
@@ -1496,20 +1692,21 @@ class MapsGraphicalOverlay extends HTMLElement {
 
       // Remove on RIGHT (leaf or entire subtree for parent)
       if (li && li.querySelector("details")) {
-        const parentOfRemoved = li.parentElement.closest("details");
+        const parentOfRemoved = li.parentElement.closest("details") ?? null;
         li.remove();
-        pruneEmptyAncestors(parentOfRemoved);
         if (parentOfRemoved) {
+          // update checkbox states first so prune sees the correct (now unchecked) state
           recomputeSubtree(parentOfRemoved);
           recomputeUpwardsFrom(parentOfRemoved);
+          pruneEmptyAncestors(parentOfRemoved);
         }
       } else {
         const parentDetails = li?.parentElement?.closest("details");
         li?.remove();
-        pruneEmptyAncestors(parentDetails);
         if (parentDetails) {
           recomputeSubtree(parentDetails);
           recomputeUpwardsFrom(parentDetails);
+          pruneEmptyAncestors(parentDetails);
         }
       }
     }
@@ -1544,30 +1741,6 @@ class MapsGraphicalOverlay extends HTMLElement {
     stopToggle(leftRoot);
     stopToggle(this.shadow.querySelector("#selectedTaxonomies"));
 
-    const closeBtn = modal.querySelector(".close");
-    const form = this.shadow.querySelector("#dataForm");
-    const clearBtn = modal.querySelector("#clearBtn");
-    const loadBtn = modal.querySelector("#loadBtn");
-    const modalBanner = modal.querySelector("#msgBanner");
-    this.ui = {
-      mapWrap,
-      content,
-      backdrop,
-      modal,
-      dialog,
-      closeBtn,
-      clearBtn,
-      modalBanner,
-    };
-
-    // Wire: left → right
-    QSA(leftRoot, "input.taxon-checkbox").forEach((cb) => {
-      cb.addEventListener("change", () => {
-        syncFromLeft.call(this, cb);
-        updateMessage();
-      });
-    });
-
     // Wire: right → left
     this.shadow
       .querySelector("#selectedTaxonomies")
@@ -1577,21 +1750,6 @@ class MapsGraphicalOverlay extends HTMLElement {
         syncFromRight.call(this, cb);
         updateMessage();
       });
-
-    const updateMessage = () => {
-      const warningThreshold = 20;
-      const count = getSelectedCount();
-      let messageText;
-
-      if (count >= warningThreshold) {
-        messageText = `You have selected ${count} genomes, which may result in long load time.`;
-        this.ui.modalBanner.classList.add("warn");
-      } else {
-        messageText = `You have selected ${count} genomes.`;
-        this.ui.modalBanner.classList.remove("warn");
-      }
-      this.ui.modalBanner.querySelector("p").textContent = messageText;
-    };
 
     this.ui.closeBtn.style.visibility = "hidden";
 
@@ -1632,30 +1790,35 @@ class MapsGraphicalOverlay extends HTMLElement {
 
       const species = getSelectedSpecies();
 
-      const postURL =
-        form.getAttribute("action") || this.getAttribute("selection-post-url"); // TODO: should be moved to the config file
-
-      if (postURL) {
+      if (species.length > 0) {
+        const response = await fetch(this.config.dataAPI.url, {
+          method: "POST",
+          body: JSON.stringify(species),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+        });
+        let json;
         try {
-          await fetch(postURL, {
-            method: (form.getAttribute("method") || "POST").toUpperCase(),
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ species }),
-          });
+          json = await response.json();
         } catch (err) {
-          console.error("Failed to POST species selection: ", err);
+          console.error("API error:", err);
         }
+        this.dataLoader.updateDataObject(json);
+        const locationObjs = await this.loadData();
+        this.generateFilters(this.dataLoader.getAllFilters());
+        this.loadMap(locationObjs, true);
+
+        this.removeAttribute("firstLoad");
+        this.ui.closeBtn.style.visibility = "visible";
+
+        this.selectionCommitted = this.readSelectionSet();
+        this.selectionWorking = new Set(this.selectionCommitted);
+        const loaded = true;
+        this.closeModal(loaded);
       } else {
-        console.warn("No Post URL provided.");
+        return;
       }
-      const locationObjs = await this.loadData();
-      this.generateFilters(this.dataLoader.getAllFilters());
-      this.loadMap(locationObjs, true);
-
-      this.removeAttribute("firstLoad");
-      this.ui.closeBtn.style.visibility = "visible";
-
-      this.closeModal();
     });
     updateMessage();
   }
@@ -1677,7 +1840,7 @@ class MapsGraphicalOverlay extends HTMLElement {
     if (first) first.focus();
   }
 
-  closeModal() {
+  closeModal(loaded = false) {
     if (!this.hasAttribute("open")) return;
     try {
       this.removeAttribute("open"); // TODO: this line throws an error;
@@ -1690,6 +1853,12 @@ class MapsGraphicalOverlay extends HTMLElement {
     this.ui?.content?.removeAttribute("inert");
     this.ui?.backdrop?.setAttribute("aria-hidden", "true");
     this.ui?.modal?.setAttribute("aria-hidden", "true");
+
+    if (loaded) {
+      this.selectionCommitted = new Set(this.selectionWorking || []);
+    } else {
+      this.applySelectionSet(this.selectionCommitted || new Set());
+    }
   }
 
   reload() {
@@ -1706,10 +1875,10 @@ class MapsGraphicalOverlay extends HTMLElement {
     const mapEl = this.shadow.querySelector("#map");
     this.map = new google.maps.Map(mapEl, {
       center: {
-        lat: this.config.initialLocation.lat,
-        lng: this.config.initialLocation.lng,
+        lat: this.config.mapOptions.initialLocation.lat,
+        lng: this.config.mapOptions.initialLocation.lng,
       },
-      zoom: this.config.initialLocation.zoom,
+      zoom: this.config.mapOptions.initialLocation.zoom,
       minZoom: 2,
       mapTypeId: "roadmap",
       streetViewControl: false,
@@ -1770,15 +1939,17 @@ class MapsGraphicalOverlay extends HTMLElement {
         throw new Error(`Error loading config. Status: ${configRes.status}`);
       }
       const configData = await configRes.json();
-      if (this.validateConfig(configData)) {
-        this.config = configData;
-      } else {
-        throw new Error(`Invalid config structure.`);
-      }
+      this.config = configData;
+
+      // TODO: Fix config validator
+      // if (this.validateConfig(configData)) {
+      //   this.config = configData;
+      // } else {
+      //   throw new Error(`Invalid config structure.`);
+      // }
 
       this.dataLoader = new DataLoader(
-        this.config.dataFiles,
-        Object.keys(this.config.filters)
+        this.config.filters?.map((f) => f.column) ?? []
       );
 
       await Promise.all([
@@ -1803,8 +1974,7 @@ class DataLoader {
    * @date 15/07/2025
    * @param {[string]} dataUrls
    */
-  constructor(dataUrls, filterCategories = []) {
-    this.dataUrls = dataUrls;
+  constructor(filterCategories = []) {
     this.filterCategories = filterCategories;
     this.activeFilters = {};
     this.filters = {};
@@ -1815,6 +1985,7 @@ class DataLoader {
       },
       groups: {},
     };
+    this.dataObjs = [];
     this.taxonomy = {};
     this.totalSpeciesCount = 0;
   }
@@ -1827,86 +1998,57 @@ class DataLoader {
    * @memberof dataLoader
    */
   async *dataGenerator() {
+    if (this.dataObj === null) {
+      console.error("No data loaded from API");
+      return;
+    }
     const reset = () => {
       this.meta.general.totalGenomeCount = 0;
       this.meta.general.filteredGenomeCount = 0;
       this.meta.groups = {};
+      this.jsonObjs = [];
     };
     reset();
-    let decoder = new TextDecoder("utf-8");
-    let buffer = "";
 
-    for (let url of this.dataUrls) {
-      let stream;
+    for (let row of this.dataObj) {
       try {
-        stream = await fetch(url);
-        if (!stream.ok) {
-          throw new Error(
-            `Could not load data file ${url}. Status: ${stream.status}`
-          );
-        }
-      } catch (err) {
-        console.error(err);
-        continue;
-      }
-      const reader = stream.body.getReader();
+        const json = row;
+        this.meta.general.totalGenomeCount += 1;
 
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
+        // TODO: Check if this is still needed. Standardize the way taxonomy is represented?
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop();
-
-        for (const line of lines) {
-          if (!line.trim()) continue; // skips empty lines
-          try {
-            const json = JSON.parse(line);
-            const stepIn = Object.values(json)[0];
-            this.meta.general.totalGenomeCount += 1;
-
-            if (stepIn["family"]) {
-              this.taxonomy[stepIn["family"]] ||= {};
-              if (stepIn["genus"]) {
-                this.taxonomy[stepIn["family"]][stepIn["genus"]] ||= new Set();
-                if (stepIn["species"]) {
-                  let thisGenus =
-                    this.taxonomy[stepIn["family"]][stepIn["genus"]];
-                  if (!thisGenus.has(stepIn["species"])) {
-                    thisGenus.add(stepIn["species"]);
-                    this.totalSpeciesCount++;
-                  }
-                }
+        if (json["family"]) {
+          this.taxonomy[json["family"]] ||= {};
+          if (json["genus"]) {
+            this.taxonomy[json["family"]][json["genus"]] ||= new Set();
+            if (json["species"]) {
+              let thisGenus = this.taxonomy[json["family"]][json["genus"]];
+              if (!thisGenus.has(json["species"])) {
+                thisGenus.add(json["species"]);
+                this.totalSpeciesCount++;
               }
             }
-
-            if (this.filterRow(json)) {
-              this.meta.general.filteredGenomeCount += 1;
-              this.updateMetadata(json);
-              yield json;
-            }
-            continue;
-          } catch (err) {
-            console.error("Failed to parse JSONL line:", line, err);
           }
         }
-      }
-      if (buffer.trim()) {
-        try {
-          const json = JSON.parse(buffer);
+
+        if (this.filterRow(json)) {
+          this.meta.general.filteredGenomeCount += 1;
           this.updateMetadata(json);
+          this.jsonObjs.push(json);
           yield json;
-        } catch (err) {
-          console.error("Failed to parse leftover JSONL line:", leftover, err);
         }
+        continue;
+      } catch (err) {
+        console.error("Failed to parse JSONL line:", row, err);
       }
     }
+
+    this.createAllDataBlob();
   }
 
   filterRow(row) {
     // AND filter. May switch to OR
-    const data = Object.values(row)[0];
+    const data = row;
 
     if (Object.keys(this.activeFilters).length > 0) {
       for (let group of Object.keys(this.activeFilters)) {
@@ -1927,7 +2069,7 @@ class DataLoader {
 
   updateMetadata(jsonObj) {
     this.meta.general.totalGenomeCount += 1;
-    const data = Object.values(jsonObj)[0];
+    const data = jsonObj;
     for (let group of Object.keys(data)) {
       if (this.filterCategories.includes(group) && data[group]) {
         this.meta.groups[group] = this.meta.groups[group] || {
@@ -1966,8 +2108,48 @@ class DataLoader {
     }
   }
 
+  createAllDataBlob() {
+    const rows = Array.isArray(this.jsonObjs) ? this.jsonObjs : [];
+    if (!rows.length) {
+      return new Blob([""], { type: "text/csv;charset=utf-8;" });
+    }
+
+    // If later rows have extra keys, include them too
+    const headers = [...new Set(rows.flatMap((o) => Object.keys(o)))];
+
+    const csvEscape = (val) => {
+      if (val === null || val === undefined) return "";
+      // Arrays -> join with ":"; Objects -> JSON
+      if (Array.isArray(val)) val = val.join(":");
+      else if (typeof val === "object") val = JSON.stringify(val);
+
+      let s = String(val);
+      // Quote if it contains comma, quote, or newline; and double internal quotes
+      if (/[",\r\n]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    };
+
+    const lines = [];
+    lines.push(headers.map((h) => csvEscape(h)).join(","));
+    for (const row of rows) {
+      const values = headers.map((h) => csvEscape(row[h]));
+      lines.push(values.join(","));
+    }
+
+    // CRLF is friendlier to Excel
+    const csv = lines.join("\r\n");
+    this.blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  }
+
+  getAllDataBlob() {
+    return this.blob ?? null1;
+  }
   updateDataFiles(newUrlList) {
     this.dataUrls = newUrlList;
+  }
+
+  updateDataObject(json) {
+    this.dataObj = json;
   }
 
   getTotalSpecies() {
@@ -1987,9 +2169,9 @@ class DataLoader {
 }
 
 class LocationData {
-  constructor(dataObj, filterCategories) {
+  constructor(dataObj, filterCategories, aliasMap) {
     this.country = dataObj.country || null;
-    this.stateProv = dataObj.stateProv;
+    this.stateProv = dataObj.state_province;
     this.isGlobalLevel = false;
     this.isStateLevel = false;
     this.isCountryLevel = true;
@@ -1999,6 +2181,7 @@ class LocationData {
     this.longitude;
     this.changeOnZoom = this.stateProv || this.country == "USA" ? true : false;
     this.filterCategories = filterCategories;
+    this.aliasMap = aliasMap;
     this.index = {};
 
     for (let cat of this.filterCategories) {
@@ -2096,19 +2279,18 @@ class LocationData {
       this.groupsSeen.genus.add(genus);
 
       // Each of these arrays contributes counts to their respective dimension
-      for (const dim of ["evidence", "mechanism", "antibiotic"]) {
-        const arr = Array.isArray(row[dim]) ? row[dim] : [];
-        if (arr.length === 0) continue;
 
-        // Dedupe within a single row so accidental duplicates don’t double-count
-        const uniqueLabels = new Set(arr.filter(Boolean));
+      const arr = Array.isArray(row[group]) ? row[group] : [];
+      if (arr.length === 0) continue;
 
-        for (const label of uniqueLabels) {
-          // Count toward species stacks
-          this.#bump(this.index[dim].species, label, species);
-          // Count toward genus stacks
-          this.#bump(this.index[dim].genus, label, genus);
-        }
+      // Dedupe within a single row so accidental duplicates don’t double-count
+      const uniqueLabels = new Set(arr.filter(Boolean));
+
+      for (const label of uniqueLabels) {
+        // Count toward species stacks
+        this.#bump(this.index[group].species, label, species);
+        // Count toward genus stacks
+        this.#bump(this.index[group].genus, label, genus);
       }
     }
   }
@@ -2131,7 +2313,7 @@ class LocationData {
    * - Stacks are species or genus groups
    *
    * @param {Object} opts
-   * @param {'evidence'|'mechanism'|'antibiotic'} opts.dimension
+   * @param {string} opts.dimension filter category column name
    * @param {'species'|'genus'} [opts.groupBy='species']
    * @param {'alpha'|'count'|'none'} [opts.sort='alpha']  Sort bars by label or by total count
    * @param {number} [opts.topN]  If provided, keep only the top N bars by total count
@@ -2178,24 +2360,6 @@ class LocationData {
     }));
 
     return { labels, datasets };
-  }
-
-  /**
-   * Convenience: return dataset payloads for all three dimensions.
-   * @param {'species'|'genus'} groupBy
-   */
-  getAllStackedBarDatasets(groupBy = "species") {
-    return {
-      evidence: this.getStackedBarDatasets({ dimension: "evidence", groupBy }),
-      mechanism: this.getStackedBarDatasets({
-        dimension: "mechanism",
-        groupBy,
-      }),
-      antibiotic: this.getStackedBarDatasets({
-        dimension: "antibiotic",
-        groupBy,
-      }),
-    };
   }
 
   /**
@@ -2274,7 +2438,7 @@ class LocationData {
       const data = labels.map((l) => mapLocal.get(l) ?? null);
 
       return {
-        label: toTitleCase(d),
+        label: toTitleCase(d), // TODO: title case needed?
         data,
         customLabels: localLabels,
       };
@@ -2291,6 +2455,16 @@ class LocationData {
 class HTMLhelper {
   constructor() {}
 
+  static color = {
+    textDefault: "#000",
+    menuBG: "#f8f9fa",
+    chartSettingsBG: "#000",
+    modalBG: "#fff",
+    filterMenuSectionBG: "#fff",
+    whiteBtnHover: "#f3f4f6",
+    scrollThumbFill: "#adb5bd",
+  };
+
   static styleSheets() {
     return /*html*/ `
       <link
@@ -2306,7 +2480,6 @@ class HTMLhelper {
   }
 
   static styleTag() {
-    const backgroundGrey = "#f8f9fa";
     return /*html*/ `
       <style>
         #map {
@@ -2367,13 +2540,15 @@ class HTMLhelper {
 .modal .dialog {
   pointer-events: auto;
   width: 760px;
-  max-height: 70%;
-  background: #fff;
+  height: 80%;
+  max-height: 80%;
+  background-color: ${HTMLhelper.color.menuBG};
   box-shadow: 0 16px 48px rgba(0,0,0,.24); /**TODO: make sure this is consistent with rest of shadows */
-  padding: 24px 32px 32px 32px;
+  padding: 24px 32px 24px 32px;
   display: grid;
-  grid-template-rows: auto 1fr auto; /* header | body | footer */
-  gap: 12px;
+  grid-template-rows: auto auto auto; /* header | body | footer */
+  gap: 1rem;
+
 }
 
 .modal .header {
@@ -2406,20 +2581,31 @@ class HTMLhelper {
 }
 
 .modal #msgBanner {
-
+  margin-top: 4px;
+  padding-left: 0.5rem;
+  border-left: 4px solid orange;
 }
 
+.modal #msgBanner.success {
+  border-left: 4px solid green;
+}
+
+.modal #msgBanner.warn {
+  border-left: 4px solid red;
+}
 .modal #msgBanner p {
-  color: green;
+  color: black;
   margin-bottom: 0;
 }
+.modal #msgBanner.success p {
+}
 .modal #msgBanner.warn p {
-  color: red;
 }
 
 #taxonomyModalBody {
   overflow: hidden;
   min-height: 0;
+  max-height: 100%;
 }
 
 #taxonomyModalBody form > div:first-of-type {
@@ -2431,15 +2617,16 @@ class HTMLhelper {
 }
 #taxonomyModalBody section {
   width: 100%;
-  padding: 12px 0px 12px 20px;
+
   display: grid;
   grid-template-rows: auto auto 1fr; /* title | search/intro | scroll area */
   min-height: 0;
 }
+#taxonomyModalBody #available-selected {
+  column-gap: 1rem;
+}
 #taxonomyModalBody section:first-of-type {
   border-right: 1px solid #e3e6ea;
-  padding: 12px 8px 12px 0px;
-
 }
 #taxonomyModalBody section h2 {
   margin: 0;
@@ -2478,18 +2665,20 @@ class HTMLhelper {
 }
 
 #taxonomy-search-clear:hover {
-  background: #e6e9ef;
+  background: ${HTMLhelper.color.whiteBtnHover};
 }
 
 #available-taxonomy-tree {
   overflow: auto;
   min-height: 0;
-  max-height: calc(70vh - 160px);
+  max-height: 100%;
+}
+#selectedTaxonomies {
+  max-height: 100%;
 }
 #selectedTaxonomies > .scroll-container {
   overflow: auto;
   min-height: 0;
-  max-height: calc(70vh - 160px);
 }
 
 .dialog > div:last-of-type {
@@ -2512,9 +2701,20 @@ class HTMLhelper {
   border: 1px solid #1f1f1f;
   background: #1f1f1f;
   color: #fff;
+  pointer-events: auto;
+  filter: brightness(1);
 }
-#loadBtn:hover { filter: brightness(1.1); }
-#clearBtn:hover { background: #f3f4f6; }
+#loadBtn.disabled {
+  filter: brightness(0.7);
+  pointer-events: none;
+}
+#loadBtn.disabled:hover {
+  filter: brightness(1);
+}
+#loadBtn:hover { 
+  filter: brightness(1.1);
+}
+#clearBtn:hover { background: ${HTMLhelper.color.whiteBtnHover}; }
 
 
         .list-tree,
@@ -2590,6 +2790,7 @@ class HTMLhelper {
           accent-color: #b7bcca;
         }
 
+
         /* If you disable the input (we do when indeterminate), make it feel inert */
         #selectedTaxonomies input.taxon-checkbox:disabled {
           cursor: default;
@@ -2599,11 +2800,10 @@ class HTMLhelper {
 
         #selectedTaxonomies input.taxon-checkbox:disabled:hover {
           filter: none;
-          box-shadow: 
         }
         
         #sidebar {
-          background-color: ${backgroundGrey};
+          background-color: ${HTMLhelper.color.menuBG};
           box-shadow: 0 0 10px -3px rgba(0, 0, 0, 0.4);
           clip-path: inset(0 -15px 0 0);
         }
@@ -2633,27 +2833,91 @@ class HTMLhelper {
           right: 0px;
         }
 
+        #sidebar-menu-control-group {
+          position: relative;
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          column-gap: 0.4rem;
+          margin: 0;
+          padding: 0;
+
+        }
+
         /* TODO: This should be a dynamic width */
         #charts {
           margin-top: 10px;
           margin-right: 10px;
           right: 0px;
           top: 0px;
-          height: 50px;
-          width: 180px
+          height: 90% !important;
+          width: 480px !important;
+          transition: width 0.4s, height 0.4s 0.4s; 
+        }
+        
+        #charts.collapsed {
+          transition: height 0.4s, width 0.4s 0.4s; 
+          height: 50px !important;
+          width: 180px !important;
+        }
+
+        #charts #charts-menu-chevron svg {
+          margin: auto;
+          transition: transform 0.4s ease;
+          transform: scaleY(-1);
+        }
+
+        #charts.collapsed #charts-menu-chevron svg {
+          transform: scaleY(1)
+        }
+
+        #chart-settings-btn {
+          display: flex;
+          visibility: hidden;
+          border: none !important;
+        }
+        
+        #chart-settings-btn svg {
+          transition: transform 0.4s ease;
+          transform: rotate(0deg);
+        }
+        #chart-settings-btn.rotate svg {
+          transform: rotate(90deg);
+        }
+
+        #chart-settings-dropdown {
+          position: absolute;
+          background-color: ${HTMLhelper.color.chartSettingsBG};
+          opacity: 0;
+          transition: opacity 0.2s ease;
+          display: none;
+          pointer-events: none;
+          z-index: 5;
+          color: white;
+          top: 50px;
+          right: 60px;
+          width: 200px;
+          padding: .8rem;
+        }
+
+        #chart-settings-dropdown.open {
+          display: block;
+          opacity: 1;
+          pointer-events: auto;
         }
 
         #chartContent {
+          height: 100%;
           display: flex;
           flex-direction: column;
-          justify-content: center;
           align-items: center;
           padding-right: 1rem;
           padding-left: 1rem;
           overflow: hidden;
         }
         #charts-body .chartSection {
-          margin: auto;
+          flex-grow: 1;
         }
         
         #charts-body .chartSection.active-chart {
@@ -2663,45 +2927,59 @@ class HTMLhelper {
         #charts-selector {
           display: flex;
           flex-direction: row;
-          justify-content: center;
+          justify-content: start;
           align-items: center;
+          flex-wrap: wrap;
+          column-gap: 0.5rem;
+          row-gap: 0.5rem;
           width: 80%;
           margin-bottom: 0.5rem;
           margin-top: 0.5rem;
         }
         #charts-selector button {
           color: white;
+          text-wrap: no-wrap;
           padding: 0.2rem 0.5rem; 
-          margin: 0rem 0.5rem;
           opacity: 35%;
 
         }
         #charts-selector .active-chart {
           opacity: 100%;
         }
-
+        
+        #chart-options-header h2 {
+          font-size: 1.2rem;
+          margin-bottom: 0;
+        }
         section#chart-options {
-          width: 100%;
+          max-width: 100%;
           margin-top: auto;
           margin-bottom: 0.25rem;
+          margin-left: 0.75rem;
+          margin-right: 0.75rem;
+
           padding-top: 0.5rem;
           justify-content: flex-start;
           align-self: flex-end;
           flex-grow: 1;
-          h2 {
-            font-size: 1.5rem;
-          }
           div.chart-options-group {
-            margin-left: 1rem;
+            max-width: 100%;
+            display: flex;
+            flex-wrap: wrap;
             h3 {
               font-size: 1rem;
             }
             margin-bottom: 0.5rem;
-            input {
-              margin-left: 0.5rem;
-            }
-            label {
-              margin-left: 0;
+            div {
+              column-gap: 0.75rem;
+              max-width: 100%;
+              input {
+                max-width: 100%;
+                margin-left: 0;
+              }
+              label {
+                margin-left: 0.1rem;
+              }
             }
           }
         }
@@ -2712,16 +2990,17 @@ class HTMLhelper {
         }
 
         .menu-box {
+          height: 100%;
           padding-bottom: 0;
           padding-top: 0;
-          background-color: ${backgroundGrey};
+          background-color: ${HTMLhelper.color.menuBG};
           max-width: 270px;
           overflow: hidden;
         }
 
         #charts .menu-box {
           position: relative;
-          padding: .7rem 1rem;
+          padding: .5rem 1rem;
           max-width: 480px;
         }
 
@@ -2747,9 +3026,7 @@ class HTMLhelper {
         #filter-menu-container {
           display: flex;
           flex-direction: column;
-
           padding: 1rem;
-          padding-bottom: 0;
         }
 
         .menu-title {
@@ -2765,53 +3042,69 @@ class HTMLhelper {
 
         .menu-content {
           max-height: 550px;
+          height: 100%;
           visibility: visible;
-          
+          display: flex;
+          flex-direction: column;
+          row-gap: 0.4rem;
+          margin-bottom: 0.4rem;
           transition: ease 0.3s width;
         }
 
         
         .filter-menu-btn, .menu-section {
           border: 1px solid #dee2e6;
-          background-color: white;
+          background-color: ${HTMLhelper.color.filterMenuSectionBG};
           width: 100%;          
         }
         .filter-menu-btn {
           text-align: center;
           border-radius: 0.375rem;
         }
+        #openTaxonModal:hover {
+          background-color: ${HTMLhelper.color.whiteBtnHover};
+        }
         .filter-menu-btn:hover {
           filter: brightness(0.75)
         }
         
         .menu-section {
-          margin-bottom: 0.4rem;
+          display: flex;
+          flex-direction: column;
           padding-left: 1rem;
           padding-right: 1rem;
-          padding-bottom: 1rem;
+          padding-bottom: 0rem;
           height: 44px;
           overflow: hidden;
-          transition: ease .4s height;
+          transition: ease .4s flex-grow;
+          flex-grow: 0;
         }
 
+        .menu-section.menu-opened {
+          flex-grow: 1;
+        }
 
         input.form-check-input {
           min-width: 16px;
           height: 16px;
         }
 
-        .menu-section.clear-btn {
-          font-weight: 500;
-        }
         .clear-btn {
+          font-weight: 500;
           margin-top: auto;
           padding: 0.5rem 1rem;
         }
 
-        .menu-section.menu-opened {
+        .menu-section-header div {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
         }
-        .menu-section-header {
+        .menu-section-header div h3 {
           font-weight: 600;
+          font-size: 0.9rem;
+          padding: 0;
+          margin: 0;
         }
 
         .menu-section-search {
@@ -2828,27 +3121,41 @@ class HTMLhelper {
           margin-bottom: 0.5rem;
         }
 
+        #taxonomySelectorMenuGroup div {
+          column-gap: 0.5rem;
+        }
+        #taxonomySelectorMenuGroup button#openTaxonModal {
+          width: auto;
+          flex-grow: 3;
+        }
+        #taxonomySelectorMenuGroup a#download-data-btn {
+          width: auto;
+          flex-grow: 1;
+        }
+
         .scroll-container {
           overflow: auto;
         }
         .scroll-container::-webkit-scrollbar-thumb {
-          background-color: #adb5bd;
+          min-height: 30px;
+          background-color: ${HTMLhelper.color.scrollThumbFill};
           border: 10px solid transparent;
-          border-radius: .8rem;
+          border-radius: .9rem;
           background-clip: padding-box;  
         }
-
+        
         .scroll-container::-webkit-scrollbar {
           width: 24px;
         }
 
         .menu-sub-section {
+          flex: 1 1 0%;
           max-height: 300px;
         }
 
         #taxon-dropdown {
           margin: 0.5rem;
-          background-color: ${backgroundGrey};
+          background-color: ${HTMLhelper.color.menuBG};
           padding: 0.5rem;
           transition: ease 0.4s height;
           
@@ -2889,9 +3196,10 @@ class HTMLhelper {
 
         div#chartjs-tooltip {
           z-index: 4; 
-          background-color: ${backgroundGrey};
+          background-color: ${HTMLhelper.color.menuBG};
           box-shadow: 0 0 10px -3px rgba(0, 0, 0, 0.4);
           padding: 0.7rem 1rem;
+          font-weight: 400;
         }
 
         div#chartjs-tooltip td {
@@ -2953,12 +3261,15 @@ class HTMLhelper {
     let filterCounter;
     if (id === "filter") {
       button = /*html*/ `
+      <div id="sidebar-menu-control-group">
         <button id="show-filters-button" class="sidebar-btn">
           <div class="icon" id="filterToggle">
           ${HTMLhelper.icons("filter")}
           
           </div>
         </button>
+      </div>
+        
       `;
       filterCounter = /*html*/ `
           <div id="total-filter-count" class="filter-counter ${
@@ -2969,29 +3280,38 @@ class HTMLhelper {
         `;
     } else {
       button = /*html*/ `
-        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#1f1f1f">
-          <g transform="rotate(90, 480, -480)">
-            <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/>
-          </g>
-        </svg>
+        <button id="${id}-menu-chevron" class="p-0 chevron-button justify-content-center align-items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#1f1f1f">
+            <g transform="rotate(90, 480, -480)">
+              <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/>
+            </g>
+          </svg>
+        </button>
       `;
     }
+
+    const chartSettings = /*html*/ `
+      <div id="chart-settings-dropdown">
+      </div>
+    `;
+
     return /*html*/ `
           <div
             id="menu-header"
-            class="d-flex flex-row justify-content-between align-items-center mb-1"
+            class="d-flex flex-row justify-content-between align-items-center mb-2"
           >
             <div class="menu-title mb-0"><h1>${title}</h1></div>
             <div class="d-flex justify-content-center align-items-center">
               ${filterCounter ? filterCounter : ""}
 
               
-              <button
-                id="${id}-menu-chevron"
-                class="p-0 chevron-button justify-content-center align-items-center"
-              >
+              <div class="d-flex flex-row align-items-center justify-content-between">
+                <button id="chart-settings-btn" class="justify-content-center align-items-center btn me-1">
+                  <svg id="chart-settings-svg" style="max-height: 20px;" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#1f1f1f"><path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z"/></svg>
+                </button>
+                ${id != "filter" ? chartSettings : ""}
                 ${button}
-              </button>
+              </div>
             </div>
           </div>
         `;
@@ -3031,7 +3351,7 @@ class HTMLhelper {
 
           </div>
           <div id="charts" class="charts-container menu-container shadow collapsed collapsible z-2">
-            <div class="menu-box h-100">
+            <div class="menu-box">
               ${HTMLhelper.menuHeader("Charts", "charts")}
               <div id="chartContent" class="">
                 <div id="charts-selector"></div>
@@ -3073,27 +3393,139 @@ class HTMLhelper {
 
   static icons(key) {
     switch (key) {
-      // TODO: Should be a config
-      case "evidence":
+      case "download":
         return /*html*/ `
-          <svg
-
+        <svg
           xmlns="http://www.w3.org/2000/svg"
           height="24px"
           viewBox="0 -960 960 960"
           width="24px"
           fill="#1f1f1f"
-          >
-            <path d="M200-120v-80h200v-80q-83 0-141.5-58.5T200-480q0-61 33.5-111t90.5-73q8-34 35.5-55t62.5-21l-22-62 38-14-14-36 76-28 12 38 38-14 110 300-38 14 14 38-76 28-12-38-38 14-24-66q-15 14-34.5 21t-39.5 5q-22-2-41-13.5T338-582q-27 16-42.5 43T280-480q0 50 35 85t85 35h320v80H520v80h240v80H200Zm346-458 36-14-68-188-38 14 70 188Zm-126-22q17 0 28.5-11.5T460-640q0-17-11.5-28.5T420-680q-17 0-28.5 11.5T380-640q0 17 11.5 28.5T420-600Zm126 22Zm-126-62Zm0 0Z" />
-          </svg>
-        `;
-      case "antibiotic":
+        >
+          <path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z" />
+        </svg>`;
+      case "resistant":
         return /*html*/ `
-          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#1f1f1f"><path d="m320-60-80-60v-160h-40q-33 0-56.5-23.5T120-360v-300q-17 0-28.5-11.5T80-700q0-17 11.5-28.5T120-740h120v-60h-20q-17 0-28.5-11.5T180-840q0-17 11.5-28.5T220-880h120q17 0 28.5 11.5T380-840q0 17-11.5 28.5T340-800h-20v60h120q17 0 28.5 11.5T480-700q0 17-11.5 28.5T440-660v300q0 33-23.5 56.5T360-280h-40v220Zm360-20q-66 0-113-47t-47-113v-320q0-66 47-113t113-47q66 0 113 47t47 113v320q0 66-47 113T680-80ZM200-360h160v-60h-70q-12 0-21-9t-9-21q0-12 9-21t21-9h70v-60h-70q-12 0-21-9t-9-21q0-12 9-21t21-9h70v-60H200v300Zm480-280q-33 0-56.5 23.5T600-560h160q0-33-23.5-56.5T680-640Zm-80 320h160v-160H600v160Zm80 160q33 0 56.5-23.5T760-240H600q0 33 23.5 56.5T680-160Zm0-400Zm0 320Z"/></svg>
-        `;
-      case "mechanism":
-        return /*html*/ `
-          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#1f1f1f"><path d="M600-80q-17 0-28.5-11.5T560-120v-43q-23-4-43.5-11.5T478-195l-40 40q-12 11-28.5 11.5T381-155q-12-12-12-28.5t12-28.5l41-41q-3-5-6-10.5t-6-10.5l-27-53-49 49q-12 11-28 11.5T278-278q-12-12-12-28t12-28l49-50-53-26q-5-2-9-4.5t-9-5.5l-36 36q-12 11-28.5 11.5T163-384q-12-12-12-28t12-28l35-35q-14-19-22.5-40.5T163-560h-43q-17 0-28.5-11.5T80-600q0-17 11.5-28.5T120-640h45q5-19 12-36t18-33l-35-35q-12-12-12-28t12-28q12-12 28-12t28 12l35 35q16-11 33-18t36-12v-45q0-17 11.5-28.5T360-880q17 0 28.5 11.5T400-840v43q24 4 45.5 13t40.5 23l35-35q12-12 28.5-12t28.5 12q12 12 12 28t-12 28l-37 37q2 4 4.5 8t4.5 9l25 50 46-46q12-12 28.5-12t28.5 12q12 12 12 28.5T678-625l-48 47 56 28q6 3 12.5 6.5T710-536l40-40q12-12 28-12t28 12q12 12 12 28.5T806-519l-40 39q12 18 19.5 38t11.5 42h43q17 0 28.5 11.5T880-360q0 17-11.5 28.5T840-320h-45q-5 19-12 35.5T765-252l34 34q12 12 12 28.5T799-161q-12 11-28.5 11.5T742-161l-33-34q-16 11-33 18t-36 12v45q0 17-11.5 28.5T600-80Zm-6-160q58 0 95.5-44T718-386q-5-30-22.5-54T650-478l-66-34q-23-12-41.5-30.5T512-584l-34-66q-16-32-46-51t-66-19q-58 0-95.5 44T242-574q5 30 22.5 54t45.5 38l66 34q23 12 41.5 30.5T448-376l34 66q16 32 46 51t66 19ZM380-540q25 0 42.5-17.5T440-600q0-25-17.5-42.5T380-660q-25 0-42.5 17.5T320-600q0 25 17.5 42.5T380-540Zm200 250q21 0 35.5-14.5T630-340q0-21-14.5-35.5T580-390q-21 0-35.5 14.5T530-340q0 21 14.5 35.5T580-290ZM480-480Z"/></svg>
+        <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+          <svg
+            height="24"
+            viewBox="0 -960 960 959.99999"
+            width="24"
+            fill="#1f1f1f"
+            version="1.1"
+            id="svg1"
+            sodipodi:docname="antibiotic_resistant.svg"
+            xml:space="preserve"
+            inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+            xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+            xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:svg="http://www.w3.org/2000/svg"><defs
+              id="defs1"><inkscape:path-effect
+                effect="fillet_chamfer"
+                id="path-effect12"
+                is_visible="true"
+                lpeversion="1"
+                nodesatellites_param="F,0,0,1,0,1548,0,1 @ F,0,0,1,0,1548,0,1 @ F,0,0,1,0,1548,0,1 @ F,0,0,1,0,1548,0,1"
+                radius="38.700001"
+                unit="px"
+                method="auto"
+                mode="F"
+                chamfer_steps="1"
+                flexible="false"
+                use_knot_distance="true"
+                apply_no_radius="true"
+                apply_with_radius="true"
+                only_selected="false"
+                hide_knots="false" /><inkscape:path-effect
+                effect="fillet_chamfer"
+                id="path-effect11"
+                is_visible="true"
+                lpeversion="1"
+                nodesatellites_param="F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1"
+                radius="0"
+                unit="px"
+                method="auto"
+                mode="F"
+                chamfer_steps="1"
+                flexible="false"
+                use_knot_distance="true"
+                apply_no_radius="true"
+                apply_with_radius="true"
+                only_selected="false"
+                hide_knots="false" /><inkscape:path-effect
+                effect="fillet_chamfer"
+                id="path-effect11-7"
+                is_visible="true"
+                lpeversion="1"
+                nodesatellites_param="F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1"
+                radius="0"
+                unit="px"
+                method="auto"
+                mode="F"
+                chamfer_steps="1"
+                flexible="false"
+                use_knot_distance="true"
+                apply_no_radius="true"
+                apply_with_radius="true"
+                only_selected="false"
+                hide_knots="false" /><clipPath
+                clipPathUnits="userSpaceOnUse"
+                id="clipPath13"><rect
+                  style="fill:#1f1f1f;fill-opacity:0.562319;stroke-width:511.68;stroke-dasharray:none"
+                  id="rect14"
+                  width="527.81372"
+                  height="642.06982"
+                  x="121.70764"
+                  y="-813.45398" /></clipPath><clipPath
+                clipPathUnits="userSpaceOnUse"
+                id="clipPath14"><rect
+                  style="fill:#1f1f1f;fill-opacity:0.562319;stroke-width:511.68;stroke-dasharray:none"
+                  id="rect15"
+                  width="688.02698"
+                  height="836.9646"
+                  x="398.59436"
+                  y="-892.01233" /></clipPath></defs><sodipodi:namedview
+              id="namedview1"
+              pagecolor="#ffffff"
+              bordercolor="#000000"
+              borderopacity="0.25"
+              inkscape:showpageshadow="2"
+              inkscape:pageopacity="0.0"
+              inkscape:pagecheckerboard="0"
+              inkscape:deskcolor="#d1d1d1"
+              inkscape:zoom="32.208333"
+              inkscape:cx="3.3065977"
+              inkscape:cy="12.543338"
+              inkscape:window-width="2100"
+              inkscape:window-height="1224"
+              inkscape:window-x="2391"
+              inkscape:window-y="366"
+              inkscape:window-maximized="1"
+              inkscape:current-layer="svg1"
+              showguides="true" /><g
+              id="g15"
+              transform="matrix(1.0588235,0,0,1.0564706,183.47462,154.37429)"
+              style="stroke-width:0.945496"><g
+                style="fill:#1f1f1f;stroke-width:1.23249"
+                id="g12"
+                transform="matrix(0.76714101,0,0,0.76714101,-289.63318,-237.2013)"
+                clip-path="url(#clipPath14)"><path
+                  d="m 480,-120 q -33,0 -56.5,-23.5 Q 400,-167 400,-200 q 0,-33 23.5,-56.5 23.5,-23.5 56.5,-23.5 33,0 56.5,23.5 23.5,23.5 23.5,56.5 0,33 -23.5,56.5 Q 513,-120 480,-120 Z m -80,-240 v -480 h 160 v 480 z"
+                  id="path1-6"
+                  style="stroke-width:1.23249" /></g><path
+                id="path1"
+                d="m 18.20316,-959.99996 c -0.57158,0.79031 -0.95016,1.40246 -1.09375,1.71876 l -0.0781,0.0781 v 0.0781 0.0781 h 0.0781 v -0.0781 c 0.13328,-0.16758 0.43529,-0.55857 0.78125,-1.25 0.0928,-0.18552 0.20852,-0.41056 0.3125,-0.625 z M 4e-5,-905.23433 c 0.0322,0.0457 0.0406,0.11282 0.0781,0.15625 l 0.0781,-0.0781 c -0.0365,-0.0402 -0.11707,-0.0391 -0.15624,-0.0781 z m 490.70312,93.90625 c -44,0 -81.63542,15.69792 -112.96875,47.03125 -31.33333,31.33333 -47.03125,68.96875 -47.03125,112.96875 v 320 c 0,44 15.69792,81.63542 47.03125,112.96875 31.33333,31.33333 68.96875,47.03125 112.96875,47.03125 44,0 81.63542,-15.69792 112.96875,-47.03125 31.33333,-31.33333 47.03125,-68.96875 47.03125,-112.96875 v -320 c 0,-44 -15.69792,-81.63542 -47.03125,-112.96875 -31.33333,-31.33333 -68.96875,-47.03125 -112.96875,-47.03125 z m 0,80 c 22,0 40.81771,7.84897 56.48438,23.51562 15.66665,15.66667 23.51562,34.48438 23.51562,56.48438 h -160 c 0,-22 7.84897,-40.81771 23.51562,-56.48438 15.66667,-15.66665 34.48438,-23.51562 56.48438,-23.51562 z m -80,160 h 160 v 160 h -160 z m -327.57812,27.5 c -0.33497,2.39285 -0.3166,4.72545 0,6.5625 v 0.0781 h 0.07812 c 0.0638,-0.73641 0.0372,-3.39098 0.0781,-4.45312 -0.0492,-0.74017 -0.10697,-1.44733 -0.15624,-2.1875 z m -10.78126,103.51562 c -0.22683,0.89928 -0.56767,2.43138 -0.70312,3.125 -0.0839,-0.0616 -0.173,-0.11294 -0.23438,-0.15624 l -0.0781,-0.0781 -0.0781,-0.0781 h -0.0781 l -0.0781,0.0781 v 0.0781 0.0781 c 0.011,0.26961 0.0779,0.80356 0.15626,1.5625 0.0334,0.3232 0.038,0.69227 0.0781,1.01562 0.19896,-0.74847 0.26799,-1.55443 0.39062,-2.34374 h -0.0781 v 0.0781 0.0781 h -0.0781 v -0.0781 -0.0781 h 0.0781 v -0.0781 h 0.0781 c 0.16718,-1.08482 0.38926,-2.15683 0.625,-3.20313 z m 338.35938,108.98438 h 160 c 0,22 -7.84897,40.81771 -23.51562,56.48438 -15.66667,15.66665 -34.48438,23.51562 -56.48438,23.51562 -22,0 -40.81771,-7.84897 -56.48438,-23.51562 -15.66665,-15.66667 -23.51562,-34.48438 -23.51562,-56.48438 z m -340.78125,82.5 -0.0781,0.0781 h -0.0781 v 0.0781 h -0.0781 v 0.0781 0.0781 0.0781 0.0781 c 0.10421,0.49697 0.50399,1.34383 0.625,1.79687 l 0.0781,0.0781 c 0.003,-0.15513 -0.17711,-1.09897 -0.39062,-2.34375 z"
+                clip-path="url(#clipPath13)"
+                transform="translate(-105.56274,-108.04657)"
+                style="stroke-width:0.945496" /></g><rect
+              style="fill:#1f1f1f;fill-opacity:0;stroke-width:503.68;stroke-dasharray:none"
+              id="rect12"
+              width="737.69727"
+              height="878.03357"
+              x="-16.144901"
+              y="-998.49945" /></svg>
+
         `;
       case "filter":
         return /*html*/ `
@@ -3130,8 +3562,15 @@ class HTMLhelper {
         >
             <div class="menu-section-header d-flex justify-content-between mt-2 mb-3">
               <div>
-                ${HTMLhelper.icons(section.name)} 
-                ${toTitleCase(section.name)}
+              ${
+                section.name === "Antibiotic (Resistant)"
+                  ? HTMLhelper.icons("resistant")
+                  : ""
+              }
+                ${section.icon || ""}
+                <h3>
+                ${section.name}
+                </h3>
               </div>
               <div class="d-flex flex-row justify-end align-center">
                 <div class="section-filter-count filter-counter hide">0</div>
@@ -3142,7 +3581,7 @@ class HTMLhelper {
             <input
             type="text"
             id="${section.name}SearchBox"
-            placeholder="Search ${toTitleCase(section.name)}..."
+            placeholder="Search ${section.name}..."
             class="form-control mb-2 menu-section-search"
             />
             <div class="w-100 scroll-container menu-sub-section">
@@ -3160,14 +3599,17 @@ class HTMLhelper {
             ${selectedHint}
           </p>
           <div class="d-flex flex-row justify-content-between align-center">
-            <button id="openTaxonModal" class="filter-menu-btn w-100">Modify Selection</button>
+            <button id="openTaxonModal" class="filter-menu-btn">Modify Selection</button>
+            <a id="download-data-btn" class="filter-menu-btn">${HTMLhelper.icons(
+              "download"
+            )}</a>
           </div>
         </div>
         <h2 class="mt-2"><span style="font-weight: 500;">Filters</span></h2>
         <div class="menu-content invisible">
           ${sections}
         </div>
-        <button class="invisible menu-section clear-btn filter-menu-btn flex-row justify-center align-center">
+        <button class="invisible clear-btn filter-menu-btn justify-center align-center">
           <span>${HTMLhelper.icons("nofilter")}<span>Clear Filters
         </button>
       </div>
@@ -3184,31 +3626,33 @@ class HTMLhelper {
   ) {
     let background = backgroundColor;
     if (backgroundColor != "inherit") {
-      const background = hexToRgba(backgroundColor, 0.7);
+      background = hexToRgba(backgroundColor, 0.7);
     }
     const content = svg
       ? svgOnly
         ? svg
-        : svg + " " + toTitleCase(chartSection)
-      : toTitleCase(chartSection);
+        : svg + " " + chartSection.alias
+      : chartSection.alias;
+
     return /*html*/ `
-    <button id="${chartSection}" style="background-color: ${background};" class="btn chart-selector-btn">${content}</button>
+    <button id="${chartSection.column}" style="background-color: ${background};" class="btn chart-selector-btn">${content}</button>
     `;
   }
   static chartOptions() {
     const stackTypes = ["genus", "species"];
-
     const sortTypes = ["none", "alpha", "count"];
 
     let stackSectionString = stackTypes
       .map((type, index) => {
         return /*html*/ `
-        <input type="radio" id="${type}-stack-radio" name="stack-radio" value="${type}" ${
+          <div>
+            <input type="radio" id="${type}-stack-radio" name="stack-radio" value="${type}" ${
           index == 0 ? "checked" : ""
         }>
-          <label for="${type}-stack-radio">
-            ${toTitleCase(type)}
-          </label>
+              <label for="${type}-stack-radio">
+                ${type}
+              </label>
+          </div>
       `;
       })
       .join("");
@@ -3216,39 +3660,54 @@ class HTMLhelper {
     let sortSectionString = sortTypes
       .map((type, index) => {
         return /*html*/ `
-        <input type="radio" id="${type}-sort-radio" name="sort-radio" value="${type}" ${
+        <div>
+          <input type="radio" id="${type}-sort-radio" name="sort-radio" value="${type}" ${
           index == 0 ? "checked" : ""
         }>
-        <label for="${type}-sort-radio">
-          ${toTitleCase(type)}
-        </label>
+          <label for="${type}-sort-radio">
+            ${type}
+          </label>
+        </div>
       `;
       })
       .join("");
 
     return /*html*/ `
-      <section id="chart-options">
+      <div id="chart-options-header"> 
         <h2>Chart Options</h2>
+      </div>
+      <section id="chart-options">
         <div id="stack-mode" class="chart-options-group">
-          <h3>Stack Mode: </h3>
+          <h3>Stack Mode:</h3>
+          <div class="d-flex flex-wrap flex-row">
           ${stackSectionString}
+          </div>
         </div>
         <div id="sort-mode" class="chart-options-group">
-          <h3>Sort Mode: </h3>
+          <h3>Sort Mode:</h3>
+          <div class="d-flex flex-wrap flex-row">
           ${sortSectionString}
+          </div>
         </div>
-      </section>
-    `;
+        </section>
+        `;
+    // <div id="max-bars" class="chart-options-group">
+    //   <h3>Max Bar Count:</h3>
+    //   <div>
+    //     <label>Number of Bars (integer)</label>
+    //     <input type="number" min="1" step="1" value="0"/>
+    //   </div>
+    // </div>
   }
 
   static taxonomyModal(taxonJSON) {
     const taxonomyTree = HTMLhelper.taxon(taxonJSON);
     let htmlString = /*html*/ `
-      <div class="d-flex flex-row align-center justify-content-between">
+      <div id="available-selected" class="d-flex flex-row align-center justify-content-between h-100">
         <section id="available-taxonomies">
           <h2>Available Genomes</h2>
           <div id="modal-search-box" class="mt-2 mb-2">
-            <input id="taxonomy-search" type="search" placeholder="Search family, genus, or species" autocomplete="off" />
+            <input id="taxonomy-search" type="search" placeholder="Search family, genus, species" autocomplete="off" />
           </div>
           <div id="available-taxonomy-tree" class="scroll-container">
             ${taxonomyTree}
@@ -3283,11 +3742,6 @@ class HTMLhelper {
         .map(slug)
         .join("__")}`;
 
-    const stopToggle = (el) => {
-      // prevent clicking the checkbox from toggling <details>
-      el.addEventListener("click", (e) => e.stopPropagation());
-    };
-
     const mkCheckbox = (side, level, labels) => {
       const { family, genus, species, text } = labels;
       const id = mkId(side, level, family, genus, species);
@@ -3306,8 +3760,6 @@ class HTMLhelper {
       label.setAttribute("for", id);
       label.textContent = text;
 
-      stopToggle(input);
-
       return { input, label };
     };
 
@@ -3315,7 +3767,7 @@ class HTMLhelper {
     families.forEach((family) => {
       const famLi = document.createElement("li");
       const famDetails = document.createElement("details");
-      famDetails.open = true;
+      famDetails.open = false; // This controls the default "open" state of the taxonomy tree
       const famSummary = document.createElement("summary");
 
       const famChevron = document.createElement("span");
@@ -3325,7 +3777,7 @@ class HTMLhelper {
 
       const famCb = mkCheckbox("avail", "family", {
         family,
-        text: toTitleCase(family),
+        text: family,
       });
       famSummary.append(famCb.input, famCb.label);
       famDetails.appendChild(famSummary);
@@ -3349,7 +3801,7 @@ class HTMLhelper {
         const genCb = mkCheckbox("avail", "genus", {
           family,
           genus,
-          text: toTitleCase(genus),
+          text: genus,
         });
         genSummary.append(genCb.input, genCb.label);
         genDetails.appendChild(genSummary);
@@ -3368,7 +3820,7 @@ class HTMLhelper {
             family,
             genus,
             species,
-            text: toTitleCase(species),
+            text: species,
           });
           spWrap.append(spCb.input, spCb.label);
           spLi.appendChild(spWrap);
@@ -3381,6 +3833,35 @@ class HTMLhelper {
     // return HTML string for your template usage
     return taxonHTMLContainer.innerHTML;
   }
+}
+
+function debounce(func, duration) {
+  let timeout;
+  return function (...args) {
+    const effect = () => {
+      timeout = null;
+      return func.apply(this, args);
+    };
+
+    clearTimeout(timeout);
+    timeout = setTimeout(effect, duration);
+  };
+}
+
+function spyOn(el, property) {
+  let value = el.style.height;
+
+  Object.defineProperty(el.style, property, {
+    set(newVal) {
+      console.log(`${property} changed to:`, newVal);
+      console.trace("Call stack:"); // shows which function triggered it
+      value = newVal;
+    },
+    get() {
+      return value;
+    },
+    configurable: true,
+  });
 }
 
 function toTitleCase(str) {
